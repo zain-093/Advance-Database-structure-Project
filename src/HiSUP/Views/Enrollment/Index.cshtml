@@ -1,0 +1,60 @@
+@{
+    ViewData["Title"] = "Course Enrollment";
+}
+
+<div class="container mt-5">
+    <h2>@ViewData["Title"]</h2>
+    <hr />
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+
+    <div class="table-responsive">
+        <table class="table table-hover table-bordered shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Course Code</th>
+                    <th>Course Name</th>
+                    <th>Semester</th>
+                    <th>Available Seats</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var section in ViewBag.Sections)
+                {
+                    <tr>
+                        <td>@section.CourseCode</td>
+                        <td>@section.CourseName</td>
+                        <td>@section.Semester</td>
+                        <td>
+                            @if (section.AvailableSeats > 0)
+                            {
+                                <span class="badge bg-success">@section.AvailableSeats Seats</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Full</span>
+                            }
+                        </td>
+                        <td>
+                            <form asp-action="Enroll" method="post">
+                                <input type="hidden" name="courseId" value="@section.CourseID" />
+                                <input type="hidden" name="semester" value="@section.Semester" />
+                                <button type="submit" class="btn btn-primary btn-sm" @(section.AvailableSeats <= 0 ? "disabled" : "")>
+                                    Enroll Now
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
