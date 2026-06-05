@@ -13,10 +13,12 @@ namespace HiSUP.Data
         public DbSet<Course> Courses { get; set; }
         public DbSet<Enrollment> Enrollments { get; set; }
         public DbSet<Section> Sections { get; set; } 
+        public DbSet<StudentDashboardView> StudentDashboard { get; set; }
         
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // Configure Primary Keys if EF Core doesn't automatically detect them
+            modelBuilder.Entity<StudentDashboardView>().HasNoKey().ToView("vw_StudentDashboard");
             modelBuilder.Entity<Student>().HasKey(s => s.StudentID);
             modelBuilder.Entity<Faculty>().HasKey(f => f.FacultyID);
             modelBuilder.Entity<Course>().HasKey(c => c.CourseID);

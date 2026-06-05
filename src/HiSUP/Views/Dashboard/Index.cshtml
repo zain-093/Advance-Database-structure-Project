@@ -1,0 +1,50 @@
+@model IEnumerable<HiSUP.Models.StudentDashboardView>
+@{
+    ViewData["Title"] = "Student Dashboard";
+    var studentInfo = Model.FirstOrDefault();
+}
+
+<div class="container mt-5">
+    @if (studentInfo != null)
+    {
+        <h2 class="mb-4">Welcome, @studentInfo.FirstName @studentInfo.LastName!</h2>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card text-white bg-primary shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">Current Semester</h5>
+                        <h2 class="display-6">@studentInfo.Semester</h2>
+                        <p class="card-text">Total Enrolled Courses: <strong>@studentInfo.TotalSemesterCourses</strong></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card text-white bg-success shadow">
+                    <div class="card-body">
+                        <h5 class="card-title">Financial Status</h5>
+                        <h2 class="display-6">Rs. @studentInfo.RunningTotalFeesPaid.ToString("N2")</h2>
+                        <p class="card-text">Total Fees Paid (Running Total)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="mt-4">Your Enrolled Courses</h4>
+        <ul class="list-group">
+            @foreach (var record in Model.Where(m => !string.IsNullOrEmpty(m.CourseName)))
+            {
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    @record.CourseName
+                    <span class="badge bg-secondary rounded-pill">@record.Semester</span>
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            No enrollment or fee data found. Please register for courses to populate your dashboard.
+        </div>
+    }
+</div>
