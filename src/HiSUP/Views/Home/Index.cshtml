@@ -1,8 +1,133 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Section -->
+<section class="hero-section fade-in">
+    <div class="hero-content">
+        <div class="hero-badge">HITEC University</div>
+        <h1 class="hero-title">Student Portal</h1>
+        <p class="hero-subtitle">
+            Your one-stop platform for course enrollment, academic tracking, 
+            and managing your university journey — powered by advanced database technology.
+        </p>
+        <div class="hero-actions">
+            @if (User.Identity.IsAuthenticated)
+            {
+                if (User.IsInRole("Student"))
+                {
+                    <a asp-controller="Dashboard" asp-action="Index" class="btn-primary-custom" id="cta-dashboard">
+                        <i class="fas fa-chart-pie"></i> Go to Dashboard
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="AdminPortal" asp-action="Index" class="btn-primary-custom" id="cta-admin">
+                        <i class="fas fa-cogs"></i> Enter Portal Control Panel
+                    </a>
+                }
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Login" class="btn-primary-custom" id="cta-login">
+                    <i class="fas fa-right-to-bracket"></i> Sign In to Portal
+                </a>
+            }
+            <a asp-controller="Enrollment" asp-action="Index" class="btn-outline-custom" id="cta-enrollment">
+                <i class="fas fa-book-open"></i> Browse Courses
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Grid -->
+<div class="stats-grid fade-in" style="margin-bottom: 48px;">
+    <div class="stats-card">
+        <div class="stats-icon" style="background: linear-gradient(135deg, #4f8cff, #3b6de0);">
+            <i class="fas fa-user-graduate"></i>
+        </div>
+        <div class="stats-info">
+            <div class="stats-label">Active Students</div>
+            <div class="stats-value counter" data-target="@ViewBag.TotalStudents">0</div>
+        </div>
+    </div>
+    <div class="stats-card">
+        <div class="stats-icon" style="background: linear-gradient(135deg, #7c5cfc, #6344e0);">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="stats-info">
+            <div class="stats-label">Courses Offered</div>
+            <div class="stats-value counter" data-target="@ViewBag.TotalCourses">0</div>
+        </div>
+    </div>
+    <div class="stats-card">
+        <div class="stats-icon" style="background: linear-gradient(135deg, #00d68f, #00b876);">
+            <i class="fas fa-chalkboard-teacher"></i>
+        </div>
+        <div class="stats-info">
+            <div class="stats-label">Faculty Members</div>
+            <div class="stats-value counter" data-target="@ViewBag.TotalFaculty">0</div>
+        </div>
+    </div>
+    <div class="stats-card">
+        <div class="stats-icon" style="background: linear-gradient(135deg, #ffaa2c, #e6941e);">
+            <i class="fas fa-book-reader"></i>
+        </div>
+        <div class="stats-info">
+            <div class="stats-label">Library Books</div>
+            <div class="stats-value counter" data-target="@ViewBag.TotalBooks">0</div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="section-header fade-in">
+    <h2 class="section-title">Platform Features</h2>
+    <p class="section-subtitle">Everything you need to manage your academic life</p>
+</div>
+<div class="features-grid">
+    <div class="feature-card fade-in fade-in-delay-1">
+        <div class="feature-icon blue">
+            <i class="fas fa-chart-pie"></i>
+        </div>
+        <h3>Student Dashboard</h3>
+        <p>View your enrolled courses, track semester progress, and monitor financial records — all in real-time from a secure SQL view.</p>
+    </div>
+    <div class="feature-card fade-in fade-in-delay-2">
+        <div class="feature-icon violet">
+            <i class="fas fa-book-open"></i>
+        </div>
+        <h3>Course Enrollment</h3>
+        <p>Browse available courses, check live seat availability, and enroll instantly via a concurrent-safe stored procedure.</p>
+    </div>
+    <div class="feature-card fade-in fade-in-delay-3">
+        <div class="feature-icon cyan">
+            <i class="fas fa-shield-halved"></i>
+        </div>
+        <h3>Secure by Design</h3>
+        <p>Row-Level Security ensures every student only sees their own data. Enterprise-grade SQL Server features protect your records.</p>
+    </div>
+</div>
+
+<!-- How It Works Section -->
+<div class="section-header fade-in">
+    <h2 class="section-title">How It Works</h2>
+    <p class="section-subtitle">Get started in three simple steps</p>
+</div>
+<div class="steps-grid fade-in">
+    <div class="step-card">
+        <div class="step-number">1</div>
+        <h4>Sign In</h4>
+        <p>Login with your university credentials to access your personalized portal.</p>
+    </div>
+    <div class="step-card">
+        <div class="step-number">2</div>
+        <h4>Browse &amp; Enroll</h4>
+        <p>Explore available courses for the current semester and enroll with one click.</p>
+    </div>
+    <div class="step-card">
+        <div class="step-number">3</div>
+        <h4>Track Progress</h4>
+        <p>Monitor your enrollments, fees, and academic progress on your dashboard.</p>
+    </div>
 </div>

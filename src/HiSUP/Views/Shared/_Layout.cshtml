@@ -1,46 +1,126 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="HiSUP — HITEC University Student Portal for course enrollment, dashboard, and academic management." />
     <title>@ViewData["Title"] - HiSUP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/HiSUP.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">HiSUP</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                </div>
+    <!-- Sidebar Overlay (mobile) -->
+    <div id="sidebarOverlay" class="sidebar-overlay"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside id="sidebar" class="sidebar">
+        <div class="sidebar-brand">
+            <div class="brand-icon">
+                <i class="fas fa-graduation-cap"></i>
             </div>
+            <span class="brand-text">HiSUP</span>
+        </div>
+
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-title">Main Menu</div>
+            <a asp-controller="Home" asp-action="Index" class="sidebar-link" data-page="/" id="nav-home">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                if (User.IsInRole("Student"))
+                {
+                    <a asp-controller="Dashboard" asp-action="Index" class="sidebar-link" data-page="/dashboard" id="nav-dashboard">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a asp-controller="Enrollment" asp-action="Index" class="sidebar-link" data-page="/enrollment" id="nav-enrollment">
+                        <i class="fas fa-book-open"></i>
+                        <span>Enrollment</span>
+                    </a>
+                }
+                else
+                {
+                    <a asp-controller="AdminPortal" asp-action="Index" class="sidebar-link" data-page="/adminportal" id="nav-admin">
+                        <i class="fas fa-cogs"></i>
+                        <span>Control Panel</span>
+                    </a>
+                }
+            }
+
+            <div class="sidebar-section-title">Other</div>
+            <a asp-controller="Home" asp-action="Privacy" class="sidebar-link" data-page="/home/privacy" id="nav-privacy">
+                <i class="fas fa-shield-halved"></i>
+                <span>Privacy Policy</span>
+            </a>
         </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+        <div class="sidebar-footer">
+            @if (User.Identity.IsAuthenticated)
+            {
+                <form asp-controller="Account" asp-action="Logout" method="post" id="logoutForm" style="display:none;"></form>
+                <a href="javascript:document.getElementById('logoutForm').submit()" class="sidebar-link" id="nav-logout">
+                    <i class="fas fa-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+            }
+            else
+            {
+                <a asp-controller="Account" asp-action="Login" class="sidebar-link" id="nav-login">
+                    <i class="fas fa-right-to-bracket"></i>
+                    <span>Login</span>
+                </a>
+            }
+        </div>
+    </aside>
+
+    <!-- Main Content Wrapper -->
+    <div class="main-wrapper">
+        <!-- Top Bar -->
+        <header class="top-bar">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button id="sidebarToggle" class="sidebar-toggle" aria-label="Toggle navigation">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <span class="page-title">@ViewData["Title"]</span>
+            </div>
+            <div class="top-bar-right">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <div class="user-badge">
+                        <div class="user-avatar">@User.Identity.Name.Substring(0, 1).ToUpper()</div>
+                        <span>@User.Identity.Name (@(User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value ?? "User"))</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="user-badge">
+                        <div class="user-avatar">G</div>
+                        <span>Guest User</span>
+                    </div>
+                }
+            </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="main-content" role="main">
             @RenderBody()
         </main>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            &copy; 2026 HiSUP &mdash; HITEC University Student Portal &middot;
+            <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy Policy</a>
+        </footer>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - HiSUP - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

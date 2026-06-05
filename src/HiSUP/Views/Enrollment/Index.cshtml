@@ -2,59 +2,85 @@
     ViewData["Title"] = "Course Enrollment";
 }
 
-<div class="container mt-5">
-    <h2>@ViewData["Title"]</h2>
-    <hr />
-
-    @if (TempData["SuccessMessage"] != null)
-    {
-        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-    }
-    @if (TempData["ErrorMessage"] != null)
-    {
-        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-    }
-
-    <div class="table-responsive">
-        <table class="table table-hover table-bordered shadow-sm">
-            <thead class="table-dark">
-                <tr>
-                    <th>Course Code</th>
-                    <th>Course Name</th>
-                    <th>Semester</th>
-                    <th>Available Seats</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var section in ViewBag.Sections)
-                {
-                    <tr>
-                        <td>@section.CourseCode</td>
-                        <td>@section.CourseName</td>
-                        <td>@section.Semester</td>
-                        <td>
-                            @if (section.AvailableSeats > 0)
-                            {
-                                <span class="badge bg-success">@section.AvailableSeats Seats</span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-danger">Full</span>
-                            }
-                        </td>
-                        <td>
-                            <form asp-action="Enroll" method="post">
-                                <input type="hidden" name="courseId" value="@section.CourseID" />
-                                <input type="hidden" name="semester" value="@section.Semester" />
-                                <button type="submit" class="btn btn-primary btn-sm" @(section.AvailableSeats <= 0 ? "disabled" : "")>
-                                    Enroll Now
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+<!-- Toast Notifications -->
+@if (TempData["SuccessMessage"] != null || TempData["ErrorMessage"] != null)
+{
+    <div class="toast-container" id="toast-container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="toast-notification success" id="toast-success">
+                <i class="fas fa-check-circle"></i>
+                <span>@TempData["SuccessMessage"]</span>
+                <div class="toast-progress"></div>
+            </div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="toast-notification error" id="toast-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>@TempData["ErrorMessage"]</span>
+                <div class="toast-progress"></div>
+            </div>
+        }
     </div>
+}
+
+<!-- Page Header -->
+<div class="page-header fade-in">
+    <h1><i class="fas fa-book-open" style="color: var(--accent-blue);"></i> Course Enrollment</h1>
+    <p>Browse available courses for the current semester and enroll with a single click.</p>
+</div>
+
+<!-- Course Cards Grid -->
+<div class="courses-grid">
+    @foreach (var classSection in ViewBag.Sections)
+    {
+        <div class="course-card fade-in">
+            <div class="course-card-header">
+                <span class="course-code">@classSection.CourseCode</span>
+                <span class="course-semester">
+                    <i class="fas fa-calendar-day"></i>
+                    @classSection.Semester
+                </span>
+            </div>
+            <div class="course-name">@classSection.CourseName</div>
+            <div class="seat-info">
+                <div class="seat-bar-track">
+                    <div class="seat-bar-fill @(classSection.AvailableSeats > 20 ? "high" : classSection.AvailableSeats > 5 ? "medium" : "low")"
+                         style="width: @(classSection.AvailableSeats > 30 ? "100" : classSection.AvailableSeats > 20 ? "70" : classSection.AvailableSeats > 10 ? "50" : classSection.AvailableSeats > 0 ? "25" : "0")%;"></div>
+                </div>
+                <div class="seat-text">
+                    @if (classSection.AvailableSeats > 0)
+                    {
+                        <span class="seat-count @(classSection.AvailableSeats > 20 ? "available" : classSection.AvailableSeats > 5 ? "limited" : "full")">
+                            @classSection.AvailableSeats
+                        </span>
+                        <span>seats available</span>
+                    }
+                    else
+                    {
+                        <span class="seat-count full">No seats available</span>
+                    }
+                </div>
+            </div>
+            <div class="course-card-footer">
+                <form asp-action="Enroll" method="post" class="enroll-form">
+                    <input type="hidden" name="courseId" value="@classSection.CourseID" />
+                    <input type="hidden" name="semester" value="@classSection.Semester" />
+                    <button type="submit" class="enroll-btn" @(classSection.AvailableSeats <= 0 ? "disabled" : "")>
+                        @if (classSection.AvailableSeats > 0)
+                        {
+                            <i class="fas fa-plus-circle"></i>
+                            <span>Enroll Now</span>
+                        }
+                        else
+                        {
+                            <i class="fas fa-ban"></i>
+                            <span>Full</span>
+                        }
+                    </button>
+                </form>
+            </div>
+        </div>
+    }
 </div>

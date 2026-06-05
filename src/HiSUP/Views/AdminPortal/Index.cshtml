@@ -1,0 +1,1531 @@
+@model HiSUP.Models.AdminPortalViewModel
+@{
+    ViewData["Title"] = "Portal Control Panel";
+}
+
+<!-- Custom Styles for Control Panel -->
+<style>
+    .custom-pills .nav-link {
+        background: rgba(26, 31, 78, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        color: var(--text-secondary);
+        font-weight: 600;
+        font-size: 14px;
+        padding: 10px 20px;
+        border-radius: var(--radius-sm);
+        transition: all 0.3s ease;
+        margin-right: 8px;
+        margin-bottom: 8px;
+    }
+    .custom-pills .nav-link:hover {
+        background: rgba(79, 140, 255, 0.08);
+        color: var(--text-primary);
+        border-color: rgba(79, 140, 255, 0.2);
+    }
+    .custom-pills .nav-link.active {
+        background: var(--accent-gradient);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 4px 15px rgba(124, 92, 252, 0.25);
+    }
+    .table-section-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 24px 0 16px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.05);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    .form-card {
+        background: rgba(26, 31, 78, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: var(--radius-md);
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+    .form-label-custom {
+        font-size: 13px;
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+    .form-control-portal {
+        background: rgba(10, 14, 39, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: var(--radius-sm);
+        color: var(--text-primary);
+        padding: 8px 12px;
+        font-size: 14px;
+        outline: none;
+        transition: border var(--transition-fast);
+        width: 100%;
+    }
+    .form-control-portal:focus {
+        border-color: var(--accent-blue);
+        box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.15);
+    }
+    .btn-delete-record {
+        background: none;
+        border: none;
+        color: var(--danger);
+        cursor: pointer;
+        font-size: 14px;
+        transition: transform 0.2s ease;
+    }
+    .btn-delete-record:hover {
+        transform: scale(1.15);
+    }
+    .badge-role {
+        font-size: 11px;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: var(--radius-xl);
+    }
+    .badge-role.admin { background: rgba(124, 92, 252, 0.15); color: var(--accent-violet); border: 1px solid rgba(124, 92, 252, 0.25); }
+    .badge-role.faculty { background: rgba(79, 140, 255, 0.15); color: var(--accent-blue); border: 1px solid rgba(79, 140, 255, 0.25); }
+    .badge-role.student { background: rgba(0, 214, 143, 0.15); color: var(--success); border: 1px solid rgba(0, 214, 143, 0.25); }
+    .badge-role.finance { background: rgba(255, 170, 44, 0.15); color: var(--warning); border: 1px solid rgba(255, 170, 44, 0.25); }
+</style>
+
+<!-- Page Header -->
+<div class="page-header fade-in">
+    <h1><i class="fas fa-cogs" style="color: var(--accent-blue);"></i> Control Panel Dashboard</h1>
+    <p>Perform administrative operations, CRUD management, and track logs across HITECUNI_DB.</p>
+</div>
+
+<!-- Alert notifications -->
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert" style="background: rgba(0, 214, 143, 0.1); border: 1px solid rgba(0, 214, 143, 0.2); color: var(--success); border-radius: 8px;">
+        <i class="fas fa-check-circle mr-2"></i> @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="filter: invert(1);"></button>
+    </div>
+}
+
+<!-- Tabbed Navigation Menu -->
+<ul class="nav nav-pills custom-pills mb-4 fade-in" id="portalTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="academics-tab" data-bs-toggle="pill" data-bs-target="#academics" type="button" role="tab"><i class="fas fa-university"></i> Academics</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="people-tab" data-bs-toggle="pill" data-bs-target="#people" type="button" role="tab"><i class="fas fa-users"></i> People</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="registrations-tab" data-bs-toggle="pill" data-bs-target="#registrations" type="button" role="tab"><i class="fas fa-clipboard-list"></i> Registrations</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="finance-tab" data-bs-toggle="pill" data-bs-target="#finance" type="button" role="tab"><i class="fas fa-wallet"></i> Finance</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="services-tab" data-bs-toggle="pill" data-bs-target="#services" type="button" role="tab"><i class="fas fa-hotel"></i> Services</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="schedules-tab" data-bs-toggle="pill" data-bs-target="#schedules" type="button" role="tab"><i class="fas fa-calendar-alt"></i> Schedules</button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="logs-tab" data-bs-toggle="pill" data-bs-target="#logs" type="button" role="tab"><i class="fas fa-shield-halved"></i> Audit Logs</button>
+    </li>
+</ul>
+
+<!-- Tabs Contents -->
+<div class="tab-content fade-in" id="portalTabsContent">
+
+    <!-- 1. ACADEMICS TAB -->
+    <div class="tab-pane fade show active" id="academics" role="tabpanel">
+        
+        <!-- Departments Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-building text-primary"></i> Departments</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addDeptCollapse"><i class="fas fa-plus"></i> Add Department</button>
+        </div>
+        
+        <div class="collapse" id="addDeptCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Create New Department</h4>
+                <form asp-action="CreateDepartment" method="post">
+                    <div class="row">
+                        <div class="col-md-5 mb-2">
+                            <label class="form-label-custom">Department Name</label>
+                            <input type="text" name="DepartmentName" class="form-control-portal" placeholder="e.g. Computer Science" required />
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Code</label>
+                            <input type="text" name="DepartmentCode" class="form-control-portal" placeholder="e.g. CS" required />
+                        </div>
+                        <div class="col-md-3 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Department Name</th>
+                        <th>Code</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var d in Model.Departments)
+                    {
+                        <tr>
+                            <td>#@d.DepartmentID</td>
+                            <td style="color: #fff; font-weight: 500;">@d.DepartmentName</td>
+                            <td><span class="badge-custom info">@d.DepartmentCode</span></td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteDepartment" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@d.DepartmentID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Programs Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-graduation-cap text-violet"></i> Academic Programs</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addProgCollapse"><i class="fas fa-plus"></i> Add Program</button>
+        </div>
+
+        <div class="collapse" id="addProgCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Create New Program</h4>
+                <form asp-action="CreateProgram" method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label-custom">Program Name</label>
+                            <input type="text" name="ProgramName" class="form-control-portal" placeholder="e.g. BS Software Engineering" required />
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Department</label>
+                            <select name="DepartmentID" class="form-control-portal" required>
+                                @foreach (var d in Model.Departments)
+                                {
+                                    <option value="@d.DepartmentID">@d.DepartmentName (@d.DepartmentCode)</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Program Name</th>
+                        <th>Hosting Department</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model.Programs)
+                    {
+                        <tr>
+                            <td>#@p.ProgramID</td>
+                            <td style="color: #fff; font-weight: 500;">@p.ProgramName</td>
+                            <td>@(p.Department?.DepartmentName ?? "N/A")</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteProgram" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@p.ProgramID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Courses Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-book text-success"></i> Course Inventory</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addCourseCollapse"><i class="fas fa-plus"></i> Add Course</button>
+        </div>
+
+        <div class="collapse" id="addCourseCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Create New Course</h4>
+                <form asp-action="CreateCourse" method="post">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">Course Code</label>
+                            <input type="text" name="CourseCode" class="form-control-portal" placeholder="e.g. CS-202" required />
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label-custom">Course Title</label>
+                            <input type="text" name="CourseTitle" class="form-control-portal" placeholder="e.g. Database Systems" required />
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">Credit Hours</label>
+                            <input type="number" name="CreditHours" min="1" max="4" class="form-control-portal" value="3" required />
+                        </div>
+                        <div class="col-md-12 mb-2 text-end">
+                            <button type="submit" class="btn-primary-custom" style="padding: 10px 24px;"><i class="fas fa-save"></i> Save Course</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Course Title</th>
+                        <th>Credit Hours</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in Model.Courses)
+                    {
+                        <tr>
+                            <td style="font-weight: 600; color: var(--accent-blue);">@c.CourseCode</td>
+                            <td style="color: #fff; font-weight: 500;">@c.CourseTitle</td>
+                            <td>@c.CreditHours Credits</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteCourse" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@c.CourseID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Sections Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-calendar-alt text-warning"></i> Course Sections (Spring 2025)</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addSectionCollapse"><i class="fas fa-plus"></i> Add Section</button>
+        </div>
+
+        <div class="collapse" id="addSectionCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Create New Class Section</h4>
+                <form asp-action="CreateSection" method="post">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Course</label>
+                            <select name="CourseID" class="form-control-portal" required>
+                                @foreach (var c in Model.Courses)
+                                {
+                                    <option value="@c.CourseID">@c.CourseCode &mdash; @c.CourseTitle</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">Instructor</label>
+                            <select name="FacultyID" class="form-control-portal" required>
+                                @foreach (var f in Model.Faculty)
+                                {
+                                    <option value="@f.FacultyID">@f.FirstName @f.LastName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">Capacity</label>
+                            <input type="number" name="Capacity" class="form-control-portal" value="40" min="10" required />
+                        </div>
+                        <input type="hidden" name="Semester" value="Spring 2025" />
+                        <div class="col-md-2 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Section ID</th>
+                        <th>Course</th>
+                        <th>Instructor</th>
+                        <th>Semester</th>
+                        <th>Capacity Limit</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.Sections)
+                    {
+                        <tr>
+                            <td>#SEC-@s.SectionID</td>
+                            <td style="color: #fff; font-weight: 500;">@(s.Course?.CourseTitle ?? "N/A") (@(s.Course?.CourseCode ?? "N/A"))</td>
+                            <td>@(s.Faculty != null ? s.Faculty.FirstName + " " + s.Faculty.LastName : "N/A")</td>
+                            <td>@s.Semester</td>
+                            <td>@s.Capacity Seats</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteSection" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@s.SectionID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- 2. PEOPLE TAB -->
+    <div class="tab-pane fade" id="people" role="tabpanel">
+        
+        <!-- Students Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-user-graduate text-success"></i> Registered Students</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addStudentCollapse"><i class="fas fa-plus"></i> Register Student</button>
+        </div>
+
+        <div class="collapse" id="addStudentCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Register New Student</h4>
+                <form asp-action="CreateStudent" method="post">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">Registration No</label>
+                            <input type="text" name="RegistrationNo" class="form-control-portal" placeholder="e.g. 22-CS-1004" required />
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">First Name</label>
+                            <input type="text" name="FirstName" class="form-control-portal" placeholder="Muhammad" required />
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">Last Name</label>
+                            <input type="text" name="LastName" class="form-control-portal" placeholder="Ali" required />
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">Academic Program</label>
+                            <select name="ProgramID" class="form-control-portal" required>
+                                @foreach (var p in Model.Programs)
+                                {
+                                    <option value="@p.ProgramID">@p.ProgramName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label-custom">Email Address</label>
+                            <input type="email" name="Email" class="form-control-portal" placeholder="ali@hitec.edu" />
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label-custom">Phone Number</label>
+                            <input type="text" name="Phone" class="form-control-portal" placeholder="0300-1234567" />
+                        </div>
+                        <div class="col-md-12 mb-2 text-end">
+                            <button type="submit" class="btn-primary-custom" style="padding: 10px 24px;"><i class="fas fa-save"></i> Save Student</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Reg No</th>
+                        <th>Full Name</th>
+                        <th>Program</th>
+                        <th>Email</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.Students)
+                    {
+                        <tr>
+                            <td>#@s.StudentID</td>
+                            <td style="font-weight: 600; color: var(--accent-blue);">@s.RegistrationNo</td>
+                            <td style="color: #fff; font-weight: 500;">@s.FirstName @s.LastName</td>
+                            <td>@(s.Program?.ProgramName ?? "N/A")</td>
+                            <td>@s.Email</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteStudent" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@s.StudentID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Faculty Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-chalkboard-teacher text-violet"></i> Academic Faculty</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addFacultyCollapse"><i class="fas fa-plus"></i> Add Faculty</button>
+        </div>
+
+        <div class="collapse" id="addFacultyCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Add New Faculty Member</h4>
+                <form asp-action="CreateFaculty" method="post">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">First Name</label>
+                            <input type="text" name="FirstName" class="form-control-portal" required />
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Last Name</label>
+                            <input type="text" name="LastName" class="form-control-portal" required />
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Email Address</label>
+                            <input type="email" name="Email" class="form-control-portal" placeholder="name@hitec.edu" required />
+                        </div>
+                        <div class="col-md-12 mb-2 text-end">
+                            <button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Save Faculty</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var f in Model.Faculty)
+                    {
+                        <tr>
+                            <td>#@f.FacultyID</td>
+                            <td style="color: #fff; font-weight: 500;">@f.FirstName @f.LastName</td>
+                            <td>@f.Email</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteFaculty" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@f.FacultyID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Staff Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-user-shield text-info"></i> Administrative Staff</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addStaffCollapse"><i class="fas fa-plus"></i> Add Staff</button>
+        </div>
+
+        <div class="collapse" id="addStaffCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Add New Staff Member</h4>
+                <form asp-action="CreateStaff" method="post">
+                    <div class="row">
+                        <div class="col-md-8 mb-2">
+                            <label class="form-label-custom">Staff Full Name</label>
+                            <input type="text" name="StaffName" class="form-control-portal" placeholder="e.g. Sajid Ali" required />
+                        </div>
+                        <div class="col-md-4 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save Staff</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Staff Name</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var s in Model.Staffs)
+                    {
+                        <tr>
+                            <td>#@s.StaffID</td>
+                            <td style="color: #fff; font-weight: 500;">@s.StaffName</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteStaff" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@s.StaffID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- User Accounts Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-key text-warning"></i> Portal User Accounts</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addUserCollapse"><i class="fas fa-plus"></i> Create User Account</button>
+        </div>
+
+        <div class="collapse" id="addUserCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Create User Account</h4>
+                <form asp-action="CreateUserAccount" method="post">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Username</label>
+                            <input type="text" name="Username" class="form-control-portal" required />
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Password</label>
+                            <input type="password" name="PasswordHash" class="form-control-portal" required />
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Role Name</label>
+                            <select name="RoleName" class="form-control-portal" required>
+                                <option value="Admin">Admin</option>
+                                <option value="Student">Student</option>
+                                <option value="Faculty">Faculty</option>
+                                <option value="Finance">Finance</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12 mb-2 text-end">
+                            <button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Save Account</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User ID</th>
+                        <th>Username</th>
+                        <th>Password (Plain in Demo)</th>
+                        <th>Role Name</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var u in Model.UserAccounts)
+                    {
+                        <tr>
+                            <td>#USR-@u.UserID</td>
+                            <td style="color: #fff; font-weight: 500;">@u.Username</td>
+                            <td><code>@u.PasswordHash</code></td>
+                            <td>
+                                <span class="badge-role @u.RoleName.ToLower()">@u.RoleName</span>
+                            </td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteUserAccount" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@u.UserID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- 3. REGISTRATIONS TAB -->
+    <div class="tab-pane fade" id="registrations" role="tabpanel">
+        
+        <!-- Enrollments Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-id-card text-success"></i> Active Student Enrollments</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addEnrollCollapse"><i class="fas fa-plus"></i> Enroll Student</button>
+        </div>
+
+        <div class="collapse" id="addEnrollCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Enroll Student In Section</h4>
+                <form asp-action="CreateEnrollment" method="post">
+                    <div class="row">
+                        <div class="col-md-5 mb-2">
+                            <label class="form-label-custom">Student</label>
+                            <select name="StudentID" class="form-control-portal" required>
+                                @foreach (var s in Model.Students)
+                                {
+                                    <option value="@s.StudentID">@s.RegistrationNo &mdash; @s.FirstName @s.LastName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-5 mb-2">
+                            <label class="form-label-custom">Class Section</label>
+                            <select name="SectionID" class="form-control-portal" required>
+                                @foreach (var s in Model.Sections)
+                                {
+                                    <option value="@s.SectionID">@(s.Course?.CourseTitle ?? "N/A") (@(s.Course?.CourseCode ?? "N/A"))</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Enrollment ID</th>
+                        <th>Student Name</th>
+                        <th>Reg No</th>
+                        <th>Enrolled Course</th>
+                        <th>Semester</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var e in Model.Enrollments)
+                    {
+                        <tr>
+                            <td>#ENR-@e.EnrollmentID</td>
+                            <td style="color: #fff; font-weight: 500;">@(e.Student?.FirstName + " " + e.Student?.LastName)</td>
+                            <td>@e.Student?.RegistrationNo</td>
+                            <td>@(e.Section?.Course?.CourseTitle ?? "N/A")</td>
+                            <td>@e.Section?.Semester</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteEnrollment" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@e.EnrollmentID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Grades Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-award text-violet"></i> Academic Grading</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addGradeCollapse"><i class="fas fa-plus"></i> Record Grade</button>
+        </div>
+
+        <div class="collapse" id="addGradeCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Record Student Grade</h4>
+                <form asp-action="CreateGrade" method="post">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Student Course Enrollment</label>
+                            <select name="EnrollmentID" class="form-control-portal" required>
+                                @foreach (var e in Model.Enrollments)
+                                {
+                                    <option value="@e.EnrollmentID">@(e.Student?.FirstName + " " + e.Student?.LastName) &mdash; @(e.Section?.Course?.CourseTitle ?? "N/A")</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">Marks</label>
+                            <input type="number" step="0.01" name="Marks" min="0" max="100" class="form-control-portal" required />
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">Letter Grade</label>
+                            <input type="text" name="LetterGrade" class="form-control-portal" placeholder="e.g. A" required />
+                        </div>
+                        <div class="col-md-2 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Grade ID</th>
+                        <th>Student Name</th>
+                        <th>Course Code</th>
+                        <th>Marks Obtained</th>
+                        <th>Letter Grade</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var g in Model.Grades)
+                    {
+                        <tr>
+                            <td>#GR-@g.GradeID</td>
+                            <td style="color: #fff; font-weight: 500;">@(g.Enrollment?.Student?.FirstName + " " + g.Enrollment?.Student?.LastName)</td>
+                            <td>@g.Enrollment?.Section?.Course?.CourseCode</td>
+                            <td>@(g.Marks.HasValue ? g.Marks.Value.ToString("0.00") : "N/A")</td>
+                            <td><span class="badge-custom success">@g.LetterGrade</span></td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteGrade" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@g.GradeID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Attendance Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-user-check text-info"></i> Daily Attendance Records</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addAttendanceCollapse"><i class="fas fa-plus"></i> Record Attendance</button>
+        </div>
+
+        <div class="collapse" id="addAttendanceCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Record New Attendance</h4>
+                <form asp-action="CreateAttendance" method="post">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Student</label>
+                            <select name="StudentID" class="form-control-portal" required>
+                                @foreach (var s in Model.Students)
+                                {
+                                    <option value="@s.StudentID">@s.RegistrationNo &mdash; @s.FirstName @s.LastName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Section</label>
+                            <select name="SectionID" class="form-control-portal" required>
+                                @foreach (var s in Model.Sections)
+                                {
+                                    <option value="@s.SectionID">@(s.Course?.CourseTitle ?? "N/A") &mdash; @s.Semester</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <label class="form-label-custom">Status</label>
+                            <select name="Status" class="form-control-portal" required>
+                                <option value="Present">Present</option>
+                                <option value="Absent">Absent</option>
+                                <option value="Late">Late</option>
+                                <option value="Leave">Leave</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Attendance ID</th>
+                        <th>Student Name</th>
+                        <th>Course</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var a in Model.AttendanceRecords)
+                    {
+                        <tr>
+                            <td>#ATT-@a.AttendanceID</td>
+                            <td style="color: #fff; font-weight: 500;">@(a.Student?.FirstName + " " + a.Student?.LastName)</td>
+                            <td>@(a.Section?.Course?.CourseTitle ?? "N/A")</td>
+                            <td>@(a.AttendanceDate.HasValue ? a.AttendanceDate.Value.ToString("MMMM dd, yyyy") : "N/A")</td>
+                            <td>
+                                <span class="badge-custom @(a.Status == "Present" ? "success" : a.Status == "Absent" ? "danger" : "warning")">
+                                    @a.Status
+                                </span>
+                            </td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteAttendance" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@a.AttendanceID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- 4. FINANCE TAB -->
+    <div class="tab-pane fade" id="finance" role="tabpanel">
+        
+        <!-- Fee Structure Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-file-invoice-dollar text-primary"></i> Program Fee Structures</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addFeeStructCollapse"><i class="fas fa-plus"></i> Set Fee Amount</button>
+        </div>
+
+        <div class="collapse" id="addFeeStructCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Set Fee Amount for Program</h4>
+                <form asp-action="CreateFeeStructure" method="post">
+                    <div class="row">
+                        <div class="col-md-5 mb-2">
+                            <label class="form-label-custom">Academic Program</label>
+                            <select name="ProgramID" class="form-control-portal" required>
+                                @foreach (var p in Model.Programs)
+                                {
+                                    <option value="@p.ProgramID">@p.ProgramName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Amount (PKR)</label>
+                            <input type="number" step="0.01" name="Amount" class="form-control-portal" placeholder="e.g. 95000" required />
+                        </div>
+                        <div class="col-md-3 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Fee ID</th>
+                        <th>Program Name</th>
+                        <th>Semester Fee Amount</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var f in Model.FeeStructures)
+                    {
+                        <tr>
+                            <td>#FST-@f.FeeID</td>
+                            <td style="color: #fff; font-weight: 500;">@(f.Program?.ProgramName ?? "N/A")</td>
+                            <td style="color: var(--success); font-weight: 600;">Rs. @(f.Amount.HasValue ? f.Amount.Value.ToString("N2") : "0.00")</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteFeeStructure" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@f.FeeID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Fee Payments Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-money-check-dollar text-success"></i> Student Fee Payments</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addFeePayCollapse"><i class="fas fa-plus"></i> Collect Payment</button>
+        </div>
+
+        <div class="collapse" id="addFeePayCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Collect Student Fee Payment</h4>
+                <form asp-action="CreateFeePayment" method="post">
+                    <div class="row">
+                        <div class="col-md-5 mb-2">
+                            <label class="form-label-custom">Student</label>
+                            <select name="StudentID" class="form-control-portal" required>
+                                @foreach (var s in Model.Students)
+                                {
+                                    <option value="@s.StudentID">@s.RegistrationNo &mdash; @s.FirstName @s.LastName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Amount Paid (PKR)</label>
+                            <input type="number" step="0.01" name="AmountPaid" class="form-control-portal" placeholder="e.g. 50000" required />
+                        </div>
+                        <div class="col-md-3 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save Payment</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Payment ID</th>
+                        <th>Student Name</th>
+                        <th>Reg No</th>
+                        <th>Amount Paid</th>
+                        <th>Date &amp; Time</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var fp in Model.FeePayments)
+                    {
+                        <tr>
+                            <td>#FP-@fp.PaymentID</td>
+                            <td style="color: #fff; font-weight: 500;">@(fp.Student?.FirstName + " " + fp.Student?.LastName)</td>
+                            <td>@fp.Student?.RegistrationNo</td>
+                            <td style="color: var(--success); font-weight: 600;">Rs. @(fp.AmountPaid.HasValue ? fp.AmountPaid.Value.ToString("N2") : "0.00")</td>
+                            <td>@(fp.PaymentDate.HasValue ? fp.PaymentDate.Value.ToString("MMMM dd, yyyy hh:mm tt") : "N/A")</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteFeePayment" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@fp.PaymentID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- 5. SERVICES TAB (LIBRARY & HOSTELS) -->
+    <div class="tab-pane fade" id="services" role="tabpanel">
+        
+        <!-- Library Items Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-book-reader text-primary"></i> Library Book Catalog</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addLibBookCollapse"><i class="fas fa-plus"></i> Catalog Book</button>
+        </div>
+
+        <div class="collapse" id="addLibBookCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Catalog New Book</h4>
+                <form asp-action="CreateLibraryItem" method="post">
+                    <div class="row">
+                        <div class="col-md-5 mb-2">
+                            <label class="form-label-custom">Title</label>
+                            <input type="text" name="Title" class="form-control-portal" placeholder="Introduction to SQL" required />
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Author</label>
+                            <input type="text" name="Author" class="form-control-portal" placeholder="C.J. Date" required />
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">Copies Available</label>
+                            <input type="number" name="CopiesAvailable" class="form-control-portal" value="5" min="0" required />
+                        </div>
+                        <div class="col-md-12 mb-2 text-end">
+                            <button type="submit" class="btn-primary-custom"><i class="fas fa-save"></i> Save Book</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Item ID</th>
+                        <th>Book Title</th>
+                        <th>Author</th>
+                        <th>Available Copies</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var b in Model.LibraryItems)
+                    {
+                        <tr>
+                            <td>#LIB-@b.ItemID</td>
+                            <td style="color: #fff; font-weight: 500;">@b.Title</td>
+                            <td>@b.Author</td>
+                            <td>@b.CopiesAvailable Copies</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteLibraryItem" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@b.ItemID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Library Issues Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-file-invoice text-violet"></i> Books Currently Issued</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addIssueCollapse"><i class="fas fa-plus"></i> Issue Book</button>
+        </div>
+
+        <div class="collapse" id="addIssueCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Issue Library Book</h4>
+                <form asp-action="CreateLibraryIssue" method="post">
+                    <div class="row">
+                        <div class="col-md-5 mb-2">
+                            <label class="form-label-custom">Student</label>
+                            <select name="StudentID" class="form-control-portal" required>
+                                @foreach (var s in Model.Students)
+                                {
+                                    <option value="@s.StudentID">@s.RegistrationNo &mdash; @s.FirstName @s.LastName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-5 mb-2">
+                            <label class="form-label-custom">Book Title</label>
+                            <select name="ItemID" class="form-control-portal" required>
+                                @foreach (var b in Model.LibraryItems)
+                                {
+                                    <option value="@b.ItemID">@b.Title</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Issue ID</th>
+                        <th>Student Name</th>
+                        <th>Book Title</th>
+                        <th>Issue Date</th>
+                        <th>Return Date</th>
+                        <th style="width: 150px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var li in Model.LibraryIssues)
+                    {
+                        <tr>
+                            <td>#ISS-@li.IssueID</td>
+                            <td style="color: #fff; font-weight: 500;">@(li.Student?.FirstName + " " + li.Student?.LastName)</td>
+                            <td>@li.LibraryItem?.Title</td>
+                            <td>@(li.IssueDate.HasValue ? li.IssueDate.Value.ToString("MMMM dd, yyyy") : "N/A")</td>
+                            <td>
+                                @if (li.ReturnDate.HasValue)
+                                {
+                                    <span class="badge-custom success">Returned: @li.ReturnDate.Value.ToString("MMMM dd")</span>
+                                }
+                                else
+                                {
+                                    <span class="badge-custom warning">Borrowed</span>
+                                }
+                            </td>
+                            <td style="text-align: center; display: flex; justify-content: center; gap: 12px; align-items: center; border-bottom: none; padding-top: 10px;">
+                                @if (!li.ReturnDate.HasValue)
+                                {
+                                    <form asp-action="ReturnLibraryBook" method="post" style="display:inline;">
+                                        <input type="hidden" name="id" value="@li.IssueID" />
+                                        <button type="submit" class="btn-primary-custom btn-sm" style="background: linear-gradient(135deg, var(--success), #00a068); font-size: 11px; padding: 4px 10px;"><i class="fas fa-undo"></i> Return</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Hostel Halls Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-hotel text-info"></i> Hostel Accommodations</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addHostelCollapse"><i class="fas fa-plus"></i> Create Hostel</button>
+        </div>
+
+        <div class="collapse" id="addHostelCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Create Hostel Hall</h4>
+                <form asp-action="CreateHostel" method="post">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <label class="form-label-custom">Hostel Name</label>
+                            <input type="text" name="HostelName" class="form-control-portal" placeholder="e.g. Jinnah Hall (Boys)" required />
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">Capacity Limit</label>
+                            <input type="number" name="Capacity" class="form-control-portal" value="100" min="10" required />
+                        </div>
+                        <div class="col-md-3 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Hostel ID</th>
+                        <th>Hostel Name</th>
+                        <th>Total Capacity</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var h in Model.Hostels)
+                    {
+                        <tr>
+                            <td>#HST-@h.HostelID</td>
+                            <td style="color: #fff; font-weight: 500;">@h.HostelName</td>
+                            <td>@h.Capacity Rooms Available</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteHostel" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@h.HostelID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Hostel Allotments Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-bed text-warning"></i> Room Allotment list</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addAllotCollapse"><i class="fas fa-plus"></i> Allot Room</button>
+        </div>
+
+        <div class="collapse" id="addAllotCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Allot Room to Student</h4>
+                <form asp-action="CreateHostelAllotment" method="post">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Student</label>
+                            <select name="StudentID" class="form-control-portal" required>
+                                @foreach (var s in Model.Students)
+                                {
+                                    <option value="@s.StudentID">@s.RegistrationNo &mdash; @s.FirstName @s.LastName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Hostel Hall</label>
+                            <select name="HostelID" class="form-control-portal" required>
+                                @foreach (var h in Model.Hostels)
+                                {
+                                    <option value="@h.HostelID">@h.HostelName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-2 mb-2">
+                            <label class="form-label-custom">Room No</label>
+                            <input type="text" name="RoomNo" class="form-control-portal" placeholder="Room 101" required />
+                        </div>
+                        <div class="col-md-2 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Allotment ID</th>
+                        <th>Student Name</th>
+                        <th>Hostel Hall</th>
+                        <th>Room Number</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var ha in Model.HostelAllotments)
+                    {
+                        <tr>
+                            <td>#ALT-@ha.AllotmentID</td>
+                            <td style="color: #fff; font-weight: 500;">@(ha.Student?.FirstName + " " + ha.Student?.LastName)</td>
+                            <td>@ha.Hostel?.HostelName</td>
+                            <td style="color: var(--accent-cyan); font-weight: 600;">@ha.RoomNo</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteHostelAllotment" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@ha.AllotmentID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- 6. SCHEDULES TAB -->
+    <div class="tab-pane fade" id="schedules" role="tabpanel">
+        
+        <!-- Exam Schedules Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-file-signature text-primary"></i> Mid/Final Exam Timetable</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addExamCollapse"><i class="fas fa-plus"></i> Schedule Exam</button>
+        </div>
+
+        <div class="collapse" id="addExamCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Schedule Course Exam</h4>
+                <form asp-action="CreateExam" method="post">
+                    <div class="row">
+                        <div class="col-md-5 mb-2">
+                            <label class="form-label-custom">Course</label>
+                            <select name="CourseID" class="form-control-portal" required>
+                                @foreach (var c in Model.Courses)
+                                {
+                                    <option value="@c.CourseID">@c.CourseCode &mdash; @c.CourseTitle</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Exam Date</label>
+                            <input type="date" name="ExamDate" class="form-control-portal" required />
+                        </div>
+                        <div class="col-md-3 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Exam ID</th>
+                        <th>Course Code</th>
+                        <th>Course Title</th>
+                        <th>Exam Date</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var es in Model.ExamSchedules)
+                    {
+                        <tr>
+                            <td>#EX-@es.ExamID</td>
+                            <td style="font-weight: 600; color: var(--accent-blue);">@es.Course?.CourseCode</td>
+                            <td style="color: #fff; font-weight: 500;">@es.Course?.CourseTitle</td>
+                            <td>@(es.ExamDate.HasValue ? es.ExamDate.Value.ToString("MMMM dd, yyyy") : "N/A")</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteExam" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@es.ExamID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Semester Results Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-poll text-success"></i> Student GPAs / Semester Results</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addResultCollapse"><i class="fas fa-plus"></i> Record GPA</button>
+        </div>
+
+        <div class="collapse" id="addResultCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Record Student GPA</h4>
+                <form asp-action="CreateResult" method="post">
+                    <div class="row">
+                        <div class="col-md-4 mb-2">
+                            <label class="form-label-custom">Student</label>
+                            <select name="StudentID" class="form-control-portal" required>
+                                @foreach (var s in Model.Students)
+                                {
+                                    <option value="@s.StudentID">@s.RegistrationNo &mdash; @s.FirstName @s.LastName</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">Semester</label>
+                            <input type="text" name="Semester" class="form-control-portal" value="Spring 2025" required />
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <label class="form-label-custom">GPA (0.00 &mdash; 4.00)</label>
+                            <input type="number" step="0.01" name="GPA" min="0" max="4" class="form-control-portal" required />
+                        </div>
+                        <div class="col-md-2 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-save"></i> Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper mb-4">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Result ID</th>
+                        <th>Student Name</th>
+                        <th>Semester</th>
+                        <th>GPA Obtained</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model.Results)
+                    {
+                        <tr>
+                            <td>#RES-@r.ResultID</td>
+                            <td style="color: #fff; font-weight: 500;">@(r.Student?.FirstName + " " + r.Student?.LastName)</td>
+                            <td>@r.Semester</td>
+                            <td style="font-weight: 700; color: var(--accent-cyan);">@(r.GPA.HasValue ? r.GPA.Value.ToString("0.00") : "0.00")</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteResult" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@r.ResultID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Portal Notifications Table -->
+        <div class="table-section-title">
+            <span><i class="fas fa-bell text-warning"></i> General Portal Notifications</span>
+            <button class="btn-primary-custom btn-sm" data-bs-toggle="collapse" data-bs-target="#addNotifCollapse"><i class="fas fa-plus"></i> Publish Announcement</button>
+        </div>
+
+        <div class="collapse" id="addNotifCollapse">
+            <div class="form-card">
+                <h4 style="font-size: 15px; margin-bottom: 16px;">Publish Portal Announcement</h4>
+                <form asp-action="CreateNotification" method="post">
+                    <div class="row">
+                        <div class="col-md-9 mb-2">
+                            <label class="form-label-custom">Announcement Message</label>
+                            <input type="text" name="Message" class="form-control-portal" placeholder="e.g. Midterms are starting next week." required />
+                        </div>
+                        <div class="col-md-3 mb-2 d-flex align-items-end">
+                            <button type="submit" class="btn-primary-custom w-100"><i class="fas fa-bullhorn"></i> Publish</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Notification ID</th>
+                        <th>Announcement Description</th>
+                        <th style="width: 80px; text-align: center;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var n in Model.Notifications)
+                    {
+                        <tr>
+                            <td>#NTF-@n.NotificationID</td>
+                            <td style="color: #fff; font-weight: 500;">@n.Message</td>
+                            <td style="text-align: center;">
+                                <form asp-action="DeleteNotification" method="post" onsubmit="return confirm('Are you sure?');">
+                                    <input type="hidden" name="id" value="@n.NotificationID" />
+                                    <button type="submit" class="btn-delete-record"><i class="fas fa-trash-alt"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <!-- 7. SYSTEM LOGS TAB -->
+    <div class="tab-pane fade" id="logs" role="tabpanel">
+        
+        <div class="table-section-title">
+            <span><i class="fas fa-history text-danger"></i> System Audit Trail (Fired by SQL Triggers)</span>
+        </div>
+
+        <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">
+            This table reflects immediate action logs written automatically by SQL Server database triggers 
+            (e.g., <code>trg_AuditStudentInsert</code>) upon data modifications.
+        </p>
+
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Log ID</th>
+                        <th>Table Name</th>
+                        <th>Action Fired</th>
+                        <th>Action Logged Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.AuditLogs.Any())
+                    {
+                        @foreach (var log in Model.AuditLogs)
+                        {
+                            <tr>
+                                <td>#LOG-@log.LogID</td>
+                                <td style="color: #fff; font-weight: 500;">@log.TableName</td>
+                                <td>
+                                    <span class="badge-custom @(log.ActionType == "INSERT" ? "success" : log.ActionType == "DELETE" ? "danger" : "warning")">
+                                        @log.ActionType
+                                    </span>
+                                </td>
+                                <td>@(log.ActionDate.HasValue ? log.ActionDate.Value.ToString("MMMM dd, yyyy hh:mm:ss tt") : "N/A")</td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                                <i class="fas fa-info-circle"></i> Audit Log table is empty.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>

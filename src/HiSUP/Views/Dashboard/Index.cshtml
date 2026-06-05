@@ -1,50 +1,238 @@
-@model IEnumerable<HiSUP.Models.StudentDashboardView>
+@model HiSUP.Models.StudentDashboardViewModel
 @{
     ViewData["Title"] = "Student Dashboard";
-    var studentInfo = Model.FirstOrDefault();
 }
 
-<div class="container mt-5">
-    @if (studentInfo != null)
-    {
-        <h2 class="mb-4">Welcome, @studentInfo.FirstName @studentInfo.LastName!</h2>
-        
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card text-white bg-primary shadow">
-                    <div class="card-body">
-                        <h5 class="card-title">Current Semester</h5>
-                        <h2 class="display-6">@studentInfo.Semester</h2>
-                        <p class="card-text">Total Enrolled Courses: <strong>@studentInfo.TotalSemesterCourses</strong></p>
-                    </div>
-                </div>
+<!-- Welcome Banner -->
+<div class="welcome-banner fade-in">
+    <div class="welcome-avatar">
+        @(Model.Student.FirstName != null ? Model.Student.FirstName.Substring(0, 1) : "")@(Model.Student.LastName != null ? Model.Student.LastName.Substring(0, 1) : "")
+    </div>
+    <div class="welcome-info">
+        <h2>Welcome back, @Model.Student.FirstName @Model.Student.LastName!</h2>
+        <p>Here is your academic status for <strong>@Model.ProgramName</strong> (@Model.DepartmentName department).</p>
+    </div>
+</div>
+
+<!-- Stats Cards Grid -->
+<div class="stats-grid">
+    <div class="stats-card fade-in">
+        <div class="stats-icon" style="background: linear-gradient(135deg, #4f8cff, #3b6de0);">
+            <i class="fas fa-graduation-cap"></i>
+        </div>
+        <div class="stats-info">
+            <div class="stats-label">CGPA</div>
+            <div class="stats-value">@Model.CGPA.ToString("0.00")</div>
+        </div>
+    </div>
+    <div class="stats-card fade-in">
+        <div class="stats-icon" style="background: linear-gradient(135deg, #7c5cfc, #6344e0);">
+            <i class="fas fa-book"></i>
+        </div>
+        <div class="stats-info">
+            <div class="stats-label">Enrolled Courses</div>
+            <div class="stats-value">@Model.EnrolledCoursesCount</div>
+        </div>
+    </div>
+    <div class="stats-card fade-in">
+        <div class="stats-icon" style="background: linear-gradient(135deg, #ffaa2c, #e6941e);">
+            <i class="fas fa-wallet"></i>
+        </div>
+        <div class="stats-info">
+            <div class="stats-label">Outstanding Fee</div>
+            <div class="stats-value">Rs. @Model.OutstandingFee.ToString("N2")</div>
+        </div>
+    </div>
+    <div class="stats-card fade-in">
+        <div class="stats-icon" style="background: linear-gradient(135deg, #00d68f, #00b876);">
+            <i class="fas fa-calendar-check"></i>
+        </div>
+        <div class="stats-info">
+            <div class="stats-label">Attendance</div>
+            <div class="stats-value">@Model.AttendancePercentage.ToString("0")%</div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Dashboard Split Layout -->
+<div class="row">
+    <!-- Left Column: Courses -->
+    <div class="col-lg-8 mb-4">
+        <div class="data-table-wrapper fade-in">
+            <div class="data-table-header">
+                <h3><i class="fas fa-university" style="color: var(--accent-blue);"></i> Enrolled Courses</h3>
             </div>
-            <div class="col-md-6">
-                <div class="card text-white bg-success shadow">
-                    <div class="card-body">
-                        <h5 class="card-title">Financial Status</h5>
-                        <h2 class="display-6">Rs. @studentInfo.RunningTotalFeesPaid.ToString("N2")</h2>
-                        <p class="card-text">Total Fees Paid (Running Total)</p>
-                    </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Course Title</th>
+                        <th>Credit Hours</th>
+                        <th>Instructor</th>
+                        <th>Marks</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Enrollments.Any())
+                    {
+                        @foreach (var record in Model.Enrollments)
+                        {
+                            <tr>
+                                <td style="font-weight: 600; color: var(--accent-blue);">@record.CourseCode</td>
+                                <td style="color: var(--text-primary); font-weight: 500;">@record.CourseTitle</td>
+                                <td>@record.CreditHours</td>
+                                <td>@record.FacultyName</td>
+                                <td>@(record.Marks.HasValue ? record.Marks.Value.ToString("0.0") : "N/A")</td>
+                                <td>
+                                    <span class="badge-custom @(record.LetterGrade == "A" ? "success" : record.LetterGrade == "B" ? "info" : "warning")">
+                                        @record.LetterGrade
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                                <i class="fas fa-exclamation-circle" style="margin-right: 6px;"></i> No active course enrollments found.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Right Column: Hostels & Portal Info -->
+    <div class="col-lg-4 mb-4">
+        <div class="glass-card fade-in mb-4" style="padding: 20px;">
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-hotel" style="color: var(--accent-violet);"></i> Hostel Accommodation
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                    <span style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Hostel Hall</span>
+                    <div style="font-size: 15px; font-weight: 600; color: var(--text-primary);">@Model.HostelName</div>
+                </div>
+                <div>
+                    <span style="font-size: 12px; color: var(--text-muted); text-transform: uppercase;">Room Number</span>
+                    <div style="font-size: 15px; font-weight: 600; color: var(--accent-blue);">@Model.RoomNo</div>
                 </div>
             </div>
         </div>
 
-        <h4 class="mt-4">Your Enrolled Courses</h4>
-        <ul class="list-group">
-            @foreach (var record in Model.Where(m => !string.IsNullOrEmpty(m.CourseName)))
-            {
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    @record.CourseName
-                    <span class="badge bg-secondary rounded-pill">@record.Semester</span>
-                </li>
-            }
-        </ul>
-    }
-    else
-    {
-        <div class="alert alert-info">
-            No enrollment or fee data found. Please register for courses to populate your dashboard.
+        <div class="glass-card fade-in" style="padding: 20px;">
+            <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                <i class="fas fa-id-card" style="color: var(--accent-cyan);"></i> Registration Details
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 12px; font-size: 14px;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Reg No:</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">@Model.Student.RegistrationNo</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Phone:</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">@Model.Student.Phone</span>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span style="color: var(--text-muted);">Email:</span>
+                    <span style="color: var(--text-primary); font-weight: 500;">@Model.Student.Email</span>
+                </div>
+            </div>
         </div>
-    }
+    </div>
+</div>
+
+<div class="row">
+    <!-- Library Issues -->
+    <div class="col-lg-6 mb-4">
+        <div class="data-table-wrapper fade-in">
+            <div class="data-table-header">
+                <h3><i class="fas fa-book" style="color: var(--accent-violet);"></i> Library Books Borrowed</h3>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Book Title</th>
+                        <th>Author</th>
+                        <th>Issue Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.LibraryIssues.Any())
+                    {
+                        @foreach (var record in Model.LibraryIssues)
+                        {
+                            <tr>
+                                <td style="color: var(--text-primary); font-weight: 500;">@record.Title</td>
+                                <td>@record.Author</td>
+                                <td>@record.IssueDate.ToString("MMMM dd, yyyy")</td>
+                                <td>
+                                    <span class="badge-custom @(record.Status == "Returned" ? "success" : "warning")">
+                                        @record.Status
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                                <i class="fas fa-info-circle" style="margin-right: 6px;"></i> No library books currently borrowed.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Fee Payments -->
+    <div class="col-lg-6 mb-4">
+        <div class="data-table-wrapper fade-in">
+            <div class="data-table-header">
+                <h3><i class="fas fa-wallet" style="color: var(--success);"></i> Fee Payments</h3>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Payment ID</th>
+                        <th>Amount Paid</th>
+                        <th>Payment Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.FeePayments.Any())
+                    {
+                        @foreach (var record in Model.FeePayments)
+                        {
+                            <tr>
+                                <td style="font-weight: 600;">#FP-@record.PaymentID</td>
+                                <td style="color: var(--success); font-weight: 600;">Rs. @(record.AmountPaid.HasValue ? record.AmountPaid.Value.ToString("N2") : "0.00")</td>
+                                <td>@(record.PaymentDate.HasValue ? record.PaymentDate.Value.ToString("MMMM dd, yyyy hh:mm tt") : "N/A")</td>
+                                <td>
+                                    <span class="badge-custom success">
+                                        Paid
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 24px; color: var(--text-muted);">
+                                <i class="fas fa-exclamation-circle" style="margin-right: 6px;"></i> No fee payments recorded.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>

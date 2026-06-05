@@ -1,6 +1,56 @@
-﻿@{
+@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="content-page fade-in">
+    <div class="glass-card">
+        <h1><i class="fas fa-shield-halved" style="color: var(--accent-blue);"></i> Privacy Policy</h1>
+        <p class="content-subtitle">Last updated: June 2026 — HITEC University Student Portal (HiSUP)</p>
+
+        <div class="content-section">
+            <h2><i class="fas fa-database"></i> Data Collection</h2>
+            <p>HiSUP collects and stores the following student information to provide academic services:</p>
+            <ul>
+                <li>Student identification (Name, Student ID, CNIC)</li>
+                <li>Contact information (Email address)</li>
+                <li>Academic records (Enrollments, courses, semester data)</li>
+                <li>Financial records (Fee payments and running totals)</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2><i class="fas fa-lock"></i> Data Security</h2>
+            <p>We implement enterprise-grade security measures including SQL Server Row-Level Security (RLS) 
+               to ensure students can only access their own records. All database connections use session 
+               context authentication for complete data isolation between users.</p>
+        </div>
+
+        <div class="content-section">
+            <h2><i class="fas fa-eye"></i> Data Usage</h2>
+            <p>Your data is used exclusively for:</p>
+            <ul>
+                <li>Managing course enrollments and academic records</li>
+                <li>Displaying your personalized student dashboard</li>
+                <li>Processing enrollment transactions through stored procedures</li>
+                <li>University administrative and reporting purposes</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2><i class="fas fa-user-shield"></i> Your Rights</h2>
+            <p>As a student you have the right to:</p>
+            <ul>
+                <li>Access your personal data stored in the system</li>
+                <li>Request correction of inaccurate information</li>
+                <li>Know how your data is being processed</li>
+                <li>Contact the university for data-related inquiries</li>
+            </ul>
+        </div>
+
+        <div class="content-section">
+            <h2><i class="fas fa-envelope"></i> Contact</h2>
+            <p>For questions regarding your data and privacy, please contact the HITEC University 
+               IT Department or visit the university administration office.</p>
+        </div>
+    </div>
+</div>
