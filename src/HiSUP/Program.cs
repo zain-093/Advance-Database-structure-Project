@@ -1,7 +1,17 @@
+using Microsoft.EntityFrameworkCore;
+using HiSUP.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// --- ADDED THIS SECTION ---
+// Connect ASP.NET to SQL Server AND attach the RLS Interceptor
+builder.Services.AddDbContext<HiSUPContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("HiSUP_DB"))
+           .AddInterceptors(new SessionConnectionInterceptor()));
+// --------------------------
 
 var app = builder.Build();
 
