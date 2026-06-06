@@ -8,212 +8,682 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - HiSUP Portal</title>
+    <meta name="description" content="Sign in to HiSUP — HITEC University Student Portal" />
+    <title>@ViewData["Title"] — HiSUP Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <style>
+        /* ===== BASE ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            height: 100%;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
         body {
-            background-color: #070919;
-            background-image: radial-gradient(circle at 10% 20%, rgba(79, 140, 255, 0.08) 0%, transparent 40%),
-                              radial-gradient(circle at 90% 80%, rgba(124, 92, 252, 0.08) 0%, transparent 40%);
+            background: linear-gradient(135deg, #f8f9ff 0%, #eef1f8 30%, #e8ecf8 60%, #f0eef8 100%);
             display: flex;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+            padding: 24px;
+            position: relative;
+            overflow-x: hidden;
         }
-        .login-card {
+
+        /* Decorative orbs */
+        body::before, body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.5;
+            z-index: 0;
+            pointer-events: none;
+        }
+        body::before {
+            width: 500px; height: 500px;
+            background: radial-gradient(circle, rgba(79,70,229,0.15) 0%, transparent 70%);
+            top: -100px; left: -100px;
+        }
+        body::after {
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+            bottom: -150px; right: -150px;
+        }
+
+        /* Floating geometric shapes */
+        .bg-shape {
+            position: fixed;
+            border-radius: 50%;
+            opacity: 0.06;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-shape-1 {
+            width: 300px; height: 300px;
+            border: 3px solid #4F46E5;
+            top: 10%; right: 15%;
+            animation: floatA 12s ease-in-out infinite;
+        }
+        .bg-shape-2 {
+            width: 200px; height: 200px;
+            background: #7C3AED;
+            bottom: 15%; left: 10%;
+            animation: floatB 10s ease-in-out infinite;
+        }
+        .bg-shape-3 {
+            width: 150px; height: 150px;
+            border: 2px solid #06B6D4;
+            top: 60%; right: 5%;
+            animation: floatA 14s ease-in-out infinite reverse;
+        }
+
+        @@keyframes floatA {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(15px, -20px) rotate(5deg); }
+            66% { transform: translate(-10px, 15px) rotate(-3deg); }
+        }
+        @@keyframes floatB {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(20px, -15px) scale(1.05); }
+        }
+
+        /* ===== MAIN CONTAINER ===== */
+        .login-container {
+            position: relative;
+            z-index: 1;
             width: 100%;
-            max-width: 440px;
-            background: rgba(17, 22, 56, 0.7);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
-            animation: cardEntrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            max-width: 560px;
         }
-        @@keyframes cardEntrance {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .login-header {
+
+        /* ===== BRANDING ===== */
+        .brand-header {
             text-align: center;
             margin-bottom: 32px;
+            animation: fadeUp 0.6s ease forwards;
         }
-        .login-logo {
-            width: 54px;
-            height: 54px;
-            background: linear-gradient(135deg, #4f8cff, #7c5cfc);
-            border-radius: 12px;
-            display: flex;
+        .brand-logo {
+            width: 56px; height: 56px;
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            border-radius: 16px;
+            display: inline-flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
             color: #fff;
-            margin: 0 auto 16px;
-            box-shadow: 0 4px 20px rgba(124, 92, 252, 0.3);
+            margin-bottom: 16px;
+            box-shadow: 0 8px 24px rgba(79,70,229,0.25);
         }
-        .login-header h2 {
-            font-size: 24px;
+        .brand-header h1 {
+            font-size: 26px;
             font-weight: 700;
-            margin-bottom: 6px;
-            color: #fff;
+            color: #1e1b4b;
+            margin-bottom: 4px;
         }
-        .login-header p {
-            color: #9ba4b5;
+        .brand-header p {
             font-size: 14px;
-            margin: 0;
+            color: #6b7280;
+            font-weight: 400;
         }
-        .form-group-custom {
-            margin-bottom: 20px;
-            position: relative;
+
+        /* ===== CARD ===== */
+        .login-card {
+            background: rgba(255,255,255,0.82);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255,255,255,0.9);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow:
+                0 4px 6px rgba(0,0,0,0.02),
+                0 12px 40px rgba(79,70,229,0.08),
+                0 -1px 0 rgba(255,255,255,1) inset;
+            animation: fadeUp 0.6s ease 0.1s both;
         }
-        .form-group-custom label {
+
+        /* ===== STEP TRANSITIONS ===== */
+        .step { display: none; }
+        .step.active {
             display: block;
+            animation: stepIn 0.4s cubic-bezier(0.16,1,0.3,1) forwards;
+        }
+
+        @@keyframes stepIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @@keyframes fadeUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== STEP 1: ROLE SELECTION ===== */
+        .step-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1e1b4b;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+        .step-subtitle {
+            font-size: 13px;
+            color: #9ca3af;
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .roles-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .role-card {
+            position: relative;
+            background: #fff;
+            border: 2px solid #f0f0f5;
+            border-radius: 16px;
+            padding: 24px 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+            overflow: hidden;
+        }
+        .role-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .role-card:hover {
+            border-color: transparent;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(79,70,229,0.12);
+        }
+        .role-card:hover::before {
+            opacity: 1;
+        }
+        .role-card:active {
+            transform: translateY(-1px);
+        }
+
+        /* Color variants */
+        .role-card.admin::before    { background: linear-gradient(135deg, rgba(79,70,229,0.06), rgba(124,58,237,0.06)); }
+        .role-card.student::before  { background: linear-gradient(135deg, rgba(6,182,212,0.06), rgba(59,130,246,0.06)); }
+        .role-card.faculty::before  { background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(5,150,105,0.06)); }
+        .role-card.finance::before  { background: linear-gradient(135deg, rgba(245,158,11,0.06), rgba(234,88,12,0.06)); }
+
+        .role-card.admin:hover    { border-color: #4F46E5; }
+        .role-card.student:hover  { border-color: #06B6D4; }
+        .role-card.faculty:hover  { border-color: #10B981; }
+        .role-card.finance:hover  { border-color: #F59E0B; }
+
+        .role-icon {
+            width: 52px; height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: #fff;
+            margin: 0 auto 14px;
+            position: relative;
+            z-index: 1;
+        }
+        .role-card.admin .role-icon    { background: linear-gradient(135deg, #4F46E5, #7C3AED); box-shadow: 0 4px 16px rgba(79,70,229,0.25); }
+        .role-card.student .role-icon  { background: linear-gradient(135deg, #06B6D4, #3B82F6); box-shadow: 0 4px 16px rgba(6,182,212,0.25); }
+        .role-card.faculty .role-icon  { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 4px 16px rgba(16,185,129,0.25); }
+        .role-card.finance .role-icon  { background: linear-gradient(135deg, #F59E0B, #EA580C); box-shadow: 0 4px 16px rgba(245,158,11,0.25); }
+
+        .role-card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            color: #1e1b4b;
+            margin-bottom: 4px;
+            position: relative;
+            z-index: 1;
+        }
+        .role-card span {
+            font-size: 12px;
+            color: #9ca3af;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ===== STEP 2: LOGIN FORM ===== */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
             font-size: 13px;
             font-weight: 500;
-            color: #9ba4b5;
+            color: #6b7280;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 4px 0;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+            font-family: inherit;
+        }
+        .back-btn:hover { color: #4F46E5; }
+        .back-btn i { font-size: 12px; }
+
+        .selected-role-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+        .selected-role-badge.admin    { background: rgba(79,70,229,0.08); color: #4F46E5; }
+        .selected-role-badge.student  { background: rgba(6,182,212,0.08); color: #0891B2; }
+        .selected-role-badge.faculty  { background: rgba(16,185,129,0.08); color: #059669; }
+        .selected-role-badge.finance  { background: rgba(245,158,11,0.08); color: #D97706; }
+
+        .selected-role-badge i { font-size: 14px; }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
             margin-bottom: 8px;
         }
-        .input-icon-wrapper {
+        .input-wrapper {
             position: relative;
         }
-        .input-icon-wrapper i {
+        .input-wrapper i {
             position: absolute;
             left: 16px;
             top: 50%;
             transform: translateY(-50%);
-            color: #6b7280;
+            color: #c4c9d4;
             font-size: 15px;
-            transition: color 0.3s ease;
+            transition: color 0.3s;
+            z-index: 1;
         }
-        .form-control-custom {
+        .form-input {
             width: 100%;
-            height: 48px;
-            background: rgba(26, 31, 78, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 10px;
+            height: 50px;
+            background: #f9fafb;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 12px;
             padding: 0 16px 0 46px;
-            color: #e8eaed;
             font-size: 14px;
-            font-weight: 400;
-            transition: all 0.3s ease;
+            font-family: inherit;
+            color: #1f2937;
+            transition: all 0.25s ease;
             outline: none;
         }
-        .form-control-custom:focus {
-            border-color: #4f8cff;
-            background: rgba(26, 31, 78, 0.6);
-            box-shadow: 0 0 0 4px rgba(79, 140, 255, 0.15);
+        .form-input::placeholder { color: #c4c9d4; }
+        .form-input:focus {
+            border-color: #4F46E5;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(79,70,229,0.08);
         }
-        .form-control-custom:focus + i {
-            color: #4f8cff;
-        }
-        .btn-submit {
-            width: 100%;
-            height: 48px;
-            background: linear-gradient(135deg, #4f8cff, #7c5cfc);
-            color: #fff;
+        .form-input:focus ~ i { color: #4F46E5; }
+
+        /* Password toggle */
+        .toggle-password {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
             border: none;
-            border-radius: 10px;
+            color: #c4c9d4;
+            cursor: pointer;
+            font-size: 15px;
+            padding: 4px;
+            transition: color 0.2s;
+            z-index: 1;
+        }
+        .toggle-password:hover { color: #6b7280; }
+
+        .btn-login {
+            width: 100%;
+            height: 50px;
+            border: none;
+            border-radius: 12px;
             font-size: 15px;
             font-weight: 600;
+            font-family: inherit;
             cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(79, 140, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.16,1,0.3,1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: #fff;
+            margin-top: 8px;
+            position: relative;
+            overflow: hidden;
         }
-        .btn-submit:hover {
-            box-shadow: 0 6px 20px rgba(79, 140, 255, 0.35);
-            transform: translateY(-1px);
+        .btn-login.admin    { background: linear-gradient(135deg, #4F46E5, #7C3AED); box-shadow: 0 4px 16px rgba(79,70,229,0.3); }
+        .btn-login.student  { background: linear-gradient(135deg, #06B6D4, #3B82F6); box-shadow: 0 4px 16px rgba(6,182,212,0.3); }
+        .btn-login.faculty  { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 4px 16px rgba(16,185,129,0.3); }
+        .btn-login.finance  { background: linear-gradient(135deg, #F59E0B, #EA580C); box-shadow: 0 4px 16px rgba(245,158,11,0.3); }
+
+        .btn-login:hover { transform: translateY(-2px); filter: brightness(1.05); }
+        .btn-login:active { transform: translateY(0); }
+
+        /* Shine animation on hover */
+        .btn-login::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -60%;
+            width: 40%; height: 200%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: skewX(-20deg);
+            transition: left 0.5s ease;
         }
-        .validation-summary-errors {
-            background: rgba(255, 107, 107, 0.1);
-            border: 1px solid rgba(255, 107, 107, 0.2);
-            border-radius: 8px;
+        .btn-login:hover::after { left: 120%; }
+
+        /* ===== VALIDATION ===== */
+        .validation-errors {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 12px;
             padding: 12px 16px;
-            color: #ff6b6b;
+            color: #dc2626;
             font-size: 13px;
-            margin-bottom: 24px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
         }
-        .validation-summary-errors ul {
-            margin: 0;
-            padding-left: 16px;
-        }
-        .credentials-tip {
+        .validation-errors i { margin-top: 2px; flex-shrink: 0; }
+        .validation-errors ul { margin: 0; padding-left: 4px; list-style: none; }
+
+        /* ===== DEMO CREDENTIALS ===== */
+        .demo-section {
             margin-top: 24px;
             padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            font-size: 12px;
-            color: #6b7280;
-            line-height: 1.6;
+            border-top: 1px solid #f0f0f5;
         }
-        .credentials-tip strong {
-            color: #9ba4b5;
+        .demo-section summary {
+            font-size: 12px;
+            font-weight: 600;
+            color: #9ca3af;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            list-style: none;
+            user-select: none;
+        }
+        .demo-section summary::-webkit-details-marker { display: none; }
+        .demo-section summary i { color: #4F46E5; }
+        .demo-creds {
+            margin-top: 12px;
+            display: grid;
+            gap: 8px;
+        }
+        .demo-cred-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+        .demo-cred-item .label {
+            font-weight: 600;
+            color: #374151;
+        }
+        .demo-cred-item code {
+            font-family: 'SF Mono', 'Fira Code', monospace;
+            background: #e8ecf8;
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: #4F46E5;
+            font-size: 11px;
+        }
+
+        /* ===== FOOTER ===== */
+        .login-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 12px;
+            color: #9ca3af;
+            animation: fadeUp 0.6s ease 0.2s both;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @@media (max-width: 480px) {
+            body { padding: 16px; }
+            .login-card { padding: 28px 24px; border-radius: 20px; }
+            .roles-grid { gap: 10px; }
+            .role-card { padding: 20px 12px; }
+            .role-icon { width: 44px; height: 44px; font-size: 18px; }
+            .brand-header h1 { font-size: 22px; }
         }
     </style>
 </head>
 <body>
+    <!-- Background shapes -->
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+    <div class="bg-shape bg-shape-3"></div>
 
-    <div class="login-card">
-        <div class="login-header">
-            <div class="login-logo">
+    <div class="login-container">
+        <!-- Branding -->
+        <div class="brand-header">
+            <div class="brand-logo">
                 <i class="fas fa-graduation-cap"></i>
             </div>
-            <h2>Welcome to HiSUP</h2>
-            <p>HITEC University Student Portal</p>
+            <h1>HiSUP Portal</h1>
+            <p>HITEC University Student Information System</p>
         </div>
 
-        <form asp-action="Login" method="post" asp-route-returnUrl="@ViewData["ReturnUrl"]">
-            @if (!ViewData.ModelState.IsValid)
-            {
-                <div asp-validation-summary="All" class="text-danger"></div>
-            }
+        <!-- Card -->
+        <div class="login-card">
 
-            <div class="form-group-custom">
-                <label for="username">Username / Email</label>
-                <div class="input-icon-wrapper">
-                    <input type="text" id="username" name="username" class="form-control-custom" placeholder="e.g. 22-CS-1000 or admin" required autocomplete="username" />
-                    <i class="fas fa-user"></i>
+            <!-- ===== STEP 1: ROLE SELECTION ===== -->
+            <div id="step-role" class="step active">
+                <div class="step-title">Select Your Role</div>
+                <div class="step-subtitle">Choose how you'd like to sign in</div>
+
+                <div class="roles-grid">
+                    <div class="role-card admin" onclick="selectRole('admin')" id="role-admin">
+                        <div class="role-icon">
+                            <i class="fas fa-shield-halved"></i>
+                        </div>
+                        <h3>Admin</h3>
+                        <span>System Management</span>
+                    </div>
+
+                    <div class="role-card student" onclick="selectRole('student')" id="role-student">
+                        <div class="role-icon">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                        <h3>Student</h3>
+                        <span>Academic Portal</span>
+                    </div>
+
+                    <div class="role-card faculty" onclick="selectRole('faculty')" id="role-faculty">
+                        <div class="role-icon">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                        </div>
+                        <h3>Faculty</h3>
+                        <span>Teaching Portal</span>
+                    </div>
+
+                    <div class="role-card finance" onclick="selectRole('finance')" id="role-finance">
+                        <div class="role-icon">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <h3>Finance</h3>
+                        <span>Financial Services</span>
+                    </div>
                 </div>
             </div>
 
-            <div class="form-group-custom">
-                <label for="password">Password</label>
-                <div class="input-icon-wrapper">
-                    <input type="password" id="password" name="password" class="form-control-custom" placeholder="••••••••" required autocomplete="current-password" />
-                    <i class="fas fa-lock"></i>
+            <!-- ===== STEP 2: CREDENTIALS FORM ===== -->
+            <div id="step-login" class="step">
+                <button type="button" class="back-btn" onclick="goBack()" id="btn-back">
+                    <i class="fas fa-arrow-left"></i> Back to roles
+                </button>
+
+                <div id="roleBadge" class="selected-role-badge admin">
+                    <i class="fas fa-shield-halved"></i>
+                    <span id="roleBadgeText">Admin</span>
+                </div>
+
+                <div class="step-title" style="text-align:left; margin-bottom: 4px;">Welcome back</div>
+                <div class="step-subtitle" style="text-align:left; margin-bottom: 24px;" id="loginHint">
+                    Enter your admin credentials to continue
+                </div>
+
+                <form asp-action="Login" method="post" asp-route-returnUrl="@ViewData["ReturnUrl"]" id="loginForm">
+                    @if (!ViewData.ModelState.IsValid)
+                    {
+                        <div class="validation-errors">
+                            <i class="fas fa-circle-exclamation"></i>
+                            <div asp-validation-summary="All"></div>
+                        </div>
+                    }
+
+                    <div class="form-group">
+                        <label for="username">Username / Email</label>
+                        <div class="input-wrapper">
+                            <input type="text" id="username" name="username" class="form-input"
+                                   placeholder="Enter your username" required autocomplete="username" />
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="input-wrapper">
+                            <input type="password" id="password" name="password" class="form-input"
+                                   placeholder="••••••••" required autocomplete="current-password" />
+                            <i class="fas fa-lock"></i>
+                            <button type="button" class="toggle-password" onclick="togglePassword()" id="togglePwdBtn">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-login admin" id="btnLogin">
+                        <i class="fas fa-right-to-bracket"></i>
+                        <span>Sign In</span>
+                    </button>
+                </form>
+
+                <div class="demo-section">
+                    <details>
+                        <summary>
+                            <i class="fas fa-circle-info"></i> Demo credentials available
+                        </summary>
+                        <div class="demo-creds">
+                            <div class="demo-cred-item">
+                                <span class="label">Admin</span>
+                                <div><code>admin</code> / <code>admin123</code></div>
+                            </div>
+                            <div class="demo-cred-item">
+                                <span class="label">Student</span>
+                                <div><code>22-CS-1000</code> / <code>student123</code></div>
+                            </div>
+                            <div class="demo-cred-item">
+                                <span class="label">Faculty</span>
+                                <div><code>jane.smith@hitec.edu</code> / <code>faculty123</code></div>
+                            </div>
+                            <div class="demo-cred-item">
+                                <span class="label">Finance</span>
+                                <div><code>finance</code> / <code>finance123</code></div>
+                            </div>
+                        </div>
+                    </details>
                 </div>
             </div>
 
-            <button type="submit" class="btn-submit">
-                <span>Sign In</span>
-            </button>
-        </form>
+        </div>
 
-        <div class="credentials-tip">
-            <i class="fas fa-info-circle" style="color: #4f8cff; margin-right: 4px;"></i>
-            <strong>Demo Accounts Available:</strong><br />
-            &bull; <strong>Admin:</strong> <code>admin</code> / <code>admin123</code><br />
-            &bull; <strong>Student:</strong> <code>22-CS-1000</code> / <code>student123</code><br />
-            &bull; <strong>Faculty:</strong> <code>jane.smith@hitec.edu</code> / <code>faculty123</code><br />
-            &bull; <strong>Finance:</strong> <code>finance</code> / <code>finance123</code>
+        <div class="login-footer">
+            &copy; 2026 HiSUP &mdash; HITEC University Student Portal
         </div>
     </div>
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Role configuration
+        var roleConfig = {
+            admin:   { icon: 'fa-shield-halved', label: 'Admin',   hint: 'Enter your admin credentials to continue',            placeholder: 'e.g. admin' },
+            student: { icon: 'fa-user-graduate',  label: 'Student', hint: 'Enter your registration number and password',          placeholder: 'e.g. 22-CS-1000' },
+            faculty: { icon: 'fa-chalkboard-teacher', label: 'Faculty', hint: 'Enter your faculty email and password',            placeholder: 'e.g. jane.smith@hitec.edu' },
+            finance: { icon: 'fa-coins',          label: 'Finance', hint: 'Enter your finance department credentials',            placeholder: 'e.g. finance' }
+        };
+
+        var selectedRole = 'admin';
+
+        function selectRole(role) {
+            selectedRole = role;
+            var cfg = roleConfig[role];
+
+            // Update badge
+            var badge = document.getElementById('roleBadge');
+            badge.className = 'selected-role-badge ' + role;
+            badge.querySelector('i').className = 'fas ' + cfg.icon;
+            document.getElementById('roleBadgeText').textContent = cfg.label;
+
+            // Update hint & placeholder
+            document.getElementById('loginHint').textContent = cfg.hint;
+            document.getElementById('username').setAttribute('placeholder', cfg.placeholder);
+
+            // Update button color
+            var btn = document.getElementById('btnLogin');
+            btn.className = 'btn-login ' + role;
+
+            // Transition steps
+            document.getElementById('step-role').classList.remove('active');
+            setTimeout(function () {
+                document.getElementById('step-login').classList.add('active');
+                document.getElementById('username').focus();
+            }, 80);
+        }
+
+        function goBack() {
+            document.getElementById('step-login').classList.remove('active');
+            setTimeout(function () {
+                document.getElementById('step-role').classList.add('active');
+            }, 80);
+        }
+
+        function togglePassword() {
+            var pwd = document.getElementById('password');
+            var icon = document.querySelector('#togglePwdBtn i');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                pwd.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        // If validation errors exist, show the login step directly
+        document.addEventListener('DOMContentLoaded', function () {
+            var hasErrors = document.querySelector('.validation-errors');
+            if (hasErrors) {
+                document.getElementById('step-role').classList.remove('active');
+                document.getElementById('step-login').classList.add('active');
+            }
+        });
+    </script>
 </body>
 </html>
