@@ -1,133 +1,1307 @@
 @{
-    ViewData["Title"] = "Home";
+    Layout = null;
+    ViewData["Title"] = "HITEC University Portal";
 }
 
-<!-- Hero Section -->
-<section class="hero-section fade-in">
-    <div class="hero-content">
-        <div class="hero-badge">HITEC University</div>
-        <h1 class="hero-title">Student Portal</h1>
-        <p class="hero-subtitle">
-            Your one-stop platform for course enrollment, academic tracking, 
-            and managing your university journey — powered by advanced database technology.
-        </p>
-        <div class="hero-actions">
-            @if (User.Identity.IsAuthenticated)
-            {
-                if (User.IsInRole("Student"))
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="HITEC University Student Information & Administration Portal — HiSUP" />
+    <title>@ViewData["Title"] — HiSUP</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* ===== BASE & VARIABLES ===== */
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #818CF8;
+            --primary-dark: #3730A3;
+            --accent-violet: #7C3AED;
+            --accent-cyan: #06B6D4;
+            --text-dark: #1E1B4B;
+            --text-gray: #4B5563;
+            --text-light: #9CA3AF;
+            --bg-light: #F9FAFB;
+            --bg-white: #FFFFFF;
+            --bg-gradient: linear-gradient(135deg, #F5F7FF 0%, #FFFFFF 50%, #ECEFFE 100%);
+            --radius-sm: 8px;
+            --radius-md: 16px;
+            --radius-lg: 24px;
+            --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+            --shadow-lg: 0 20px 25px -5px rgba(79, 70, 229, 0.08), 0 10px 10px -5px rgba(79, 70, 229, 0.03);
+            --transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-white);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: var(--primary);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        a:hover {
+            color: var(--primary-dark);
+        }
+
+        /* ===== CONTAINER ===== */
+        .container {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* ===== HEADER/NAVBAR ===== */
+        .navbar-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid #E5E7EB;
+            z-index: 1000;
+            transition: var(--transition);
+        }
+
+        .navbar-header.scrolled {
+            box-shadow: var(--shadow-md);
+            background: #FFFFFF;
+        }
+
+        .navbar-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            height: 80px;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent-violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar-brand-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--accent-violet));
+            border-radius: 12px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-size: 18px;
+            -webkit-background-clip: initial;
+            -webkit-text-fill-color: initial;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .navbar-menu {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .navbar-link {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-gray);
+            position: relative;
+            padding: 8px 0;
+        }
+
+        .navbar-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary);
+            transition: var(--transition);
+        }
+
+        .navbar-link:hover {
+            color: var(--primary);
+        }
+
+        .navbar-link:hover::after {
+            width: 100%;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .btn-custom {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-custom-primary {
+            background: linear-gradient(135deg, var(--primary), var(--accent-violet));
+            color: #FFFFFF;
+            box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
+            border: none;
+        }
+
+        .btn-custom-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.35);
+            color: #FFFFFF;
+        }
+
+        .btn-custom-outline {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+
+        .btn-custom-outline:hover {
+            background: rgba(79, 70, 229, 0.05);
+            transform: translateY(-2px);
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            padding: 160px 0 100px;
+            background: var(--bg-gradient);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            right: -10%;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, rgba(79, 70, 229, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 60px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            background: rgba(79, 70, 229, 0.08);
+            border: 1px solid rgba(79, 70, 229, 0.15);
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: var(--primary);
+            margin-bottom: 24px;
+        }
+
+        .hero-badge i {
+            font-size: 14px;
+        }
+
+        .hero-title {
+            font-size: 54px;
+            font-weight: 800;
+            line-height: 1.15;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+            letter-spacing: -1px;
+        }
+
+        .hero-title span {
+            background: linear-gradient(135deg, var(--primary), var(--accent-violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-description {
+            font-size: 18px;
+            color: var(--text-gray);
+            margin-bottom: 36px;
+            line-height: 1.7;
+        }
+
+        .hero-buttons {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .hero-image-wrapper {
+            position: relative;
+        }
+
+        .hero-image-card {
+            background: #FFFFFF;
+            padding: 12px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+            position: relative;
+            z-index: 2;
+            transition: var(--transition);
+        }
+
+        .hero-image-card:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 30px 50px rgba(79, 70, 229, 0.12);
+        }
+
+        .hero-image {
+            width: 100%;
+            height: auto;
+            border-radius: var(--radius-md);
+            display: block;
+        }
+
+        .hero-floating-badge {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(229, 231, 235, 0.8);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            z-index: 3;
+            transition: var(--transition);
+        }
+
+        .hero-floating-badge:hover {
+            transform: scale(1.05);
+            background: #FFFFFF;
+        }
+
+        .badge-1 {
+            bottom: -20px;
+            left: -30px;
+        }
+
+        .badge-2 {
+            top: 40px;
+            right: -20px;
+        }
+
+        .floating-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-size: 18px;
+        }
+
+        .badge-1 .floating-icon {
+            background: linear-gradient(135deg, #10B981, #059669);
+        }
+
+        .badge-2 .floating-icon {
+            background: linear-gradient(135deg, var(--primary), var(--accent-violet));
+        }
+
+        .floating-info h5 {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .floating-info p {
+            font-size: 12px;
+            color: var(--text-gray);
+        }
+
+        /* ===== PORTAL ACCESS ROADWAY ===== */
+        .portals {
+            padding: 100px 0;
+            background: var(--bg-white);
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 650px;
+            margin: 0 auto 60px;
+        }
+
+        .section-header h2 {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            font-size: 16px;
+            color: var(--text-gray);
+        }
+
+        .portal-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+
+        .portal-card {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: var(--radius-lg);
+            padding: 36px 24px;
+            text-align: center;
+            transition: var(--transition);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+            transition: var(--transition);
+        }
+
+        .portal-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+            border-color: transparent;
+        }
+
+        .portal-card.student:hover::before { background: linear-gradient(90deg, #06B6D4, #3B82F6); }
+        .portal-card.faculty:hover::before { background: linear-gradient(90deg, #10B981, #059669); }
+        .portal-card.finance:hover::before { background: linear-gradient(90deg, #F59E0B, #EA580C); }
+        .portal-card.admin:hover::before   { background: linear-gradient(90deg, var(--primary), var(--accent-violet)); }
+
+        .portal-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #FFFFFF;
+            margin: 0 auto 24px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .portal-card.student .portal-icon { background: linear-gradient(135deg, #06B6D4, #3B82F6); }
+        .portal-card.faculty .portal-icon { background: linear-gradient(135deg, #10B981, #059669); }
+        .portal-card.finance .portal-icon { background: linear-gradient(135deg, #F59E0B, #EA580C); }
+        .portal-card.admin .portal-icon   { background: linear-gradient(135deg, var(--primary), var(--accent-violet)); }
+
+        .portal-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .portal-card p {
+            font-size: 14px;
+            color: var(--text-gray);
+            margin-bottom: 20px;
+            min-height: 48px;
+        }
+
+        .portal-link {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .portal-card:hover .portal-link {
+            color: var(--primary);
+        }
+
+        .portal-card:hover .portal-link i {
+            transform: translateX(4px);
+        }
+
+        .portal-link i {
+            transition: var(--transition);
+        }
+
+        /* ===== DATABASE STATS GRID ===== */
+        .stats-section {
+            padding: 80px 0;
+            background: var(--bg-light);
+            border-top: 1px solid #E5E7EB;
+            border-bottom: 1px solid #E5E7EB;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-white);
+            border-radius: var(--radius-md);
+            padding: 30px 24px;
+            text-align: center;
+            border: 1px solid #E5E7EB;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-light);
+        }
+
+        .stat-card-icon {
+            font-size: 32px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--accent-violet));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: inline-block;
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-gray);
+        }
+
+        /* ===== DEPARTMENTS SHOWCASE ===== */
+        .departments {
+            padding: 100px 0;
+            background: var(--bg-white);
+        }
+
+        .dept-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .dept-card {
+            background: #FFFFFF;
+            border: 1px solid #E5E7EB;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .dept-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+            border-color: #E5E7EB;
+        }
+
+        .dept-image-area {
+            height: 180px;
+            background: linear-gradient(135deg, var(--primary-light), var(--accent-violet));
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-size: 48px;
+        }
+
+        .dept-card.cs .dept-image-area { background: linear-gradient(135deg, #3B82F6, #1D4ED8); }
+        .dept-card.ee .dept-image-area { background: linear-gradient(135deg, #10B981, #047857); }
+        .dept-card.me .dept-image-area { background: linear-gradient(135deg, #F59E0B, #B45309); }
+
+        .dept-content {
+            padding: 24px;
+        }
+
+        .dept-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .dept-desc {
+            font-size: 14px;
+            color: var(--text-gray);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .dept-info-badges {
+            display: flex;
+            gap: 12px;
+        }
+
+        .dept-badge {
+            background: var(--bg-light);
+            border: 1px solid #E5E7EB;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-gray);
+        }
+
+        /* ===== NEWS & ANNOUNCEMENTS ===== */
+        .news {
+            padding: 100px 0;
+            background: var(--bg-light);
+            border-top: 1px solid #E5E7EB;
+        }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+        }
+
+        .news-card {
+            background: #FFFFFF;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            border: 1px solid #E5E7EB;
+            transition: var(--transition);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .news-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .news-img {
+            height: 200px;
+            width: 100%;
+            background-size: cover;
+            background-position: center;
+            background-color: #E5E7EB;
+        }
+
+        .news-content {
+            padding: 24px;
+        }
+
+        .news-date {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .news-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .news-desc {
+            font-size: 14px;
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+
+        /* ===== CTA AREA ===== */
+        .cta-banner {
+            padding: 100px 0;
+            background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+            color: #FFFFFF;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -30%;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+            border-radius: 50%;
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .cta-content h2 {
+            font-size: 40px;
+            font-weight: 800;
+            margin-bottom: 18px;
+        }
+
+        .cta-content p {
+            font-size: 18px;
+            margin-bottom: 36px;
+            opacity: 0.9;
+        }
+
+        .btn-white {
+            background: #FFFFFF;
+            color: var(--primary);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-white:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            background: #F3F4F6;
+            color: var(--primary);
+        }
+
+        /* ===== FOOTER ===== */
+        .footer-site {
+            background: #FFFFFF;
+            border-top: 1px solid #E5E7EB;
+            padding: 80px 0 30px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr 0.8fr 1.2fr;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .footer-col h4 {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 24px;
+        }
+
+        .footer-about p {
+            font-size: 14px;
+            color: var(--text-gray);
+            margin-bottom: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .social-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--bg-light);
+            border: 1px solid #E5E7EB;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-gray);
+            transition: var(--transition);
+        }
+
+        .social-btn:hover {
+            background: var(--primary);
+            color: #FFFFFF;
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            font-size: 14px;
+            color: var(--text-gray);
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            padding-left: 4px;
+        }
+
+        .contact-info li {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            font-size: 14px;
+            color: var(--text-gray);
+            margin-bottom: 16px;
+        }
+
+        .contact-info i {
+            color: var(--primary);
+            margin-top: 4px;
+        }
+
+        .footer-bottom {
+            border-top: 1px solid #E5E7EB;
+            padding-top: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-light);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @@media (max-width: 1024px) {
+            .hero-grid { grid-template-columns: 1fr; text-align: center; gap: 48px; }
+            .hero-badge, .hero-buttons { justify-content: center; }
+            .hero-image-wrapper { max-width: 500px; margin: 0 auto; }
+            .portal-grid { grid-template-columns: repeat(2, 1fr); }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .dept-grid { grid-template-columns: repeat(2, 1fr); }
+            .news-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @@media (max-width: 768px) {
+            .navbar-menu { display: none; }
+            .hero-title { font-size: 40px; }
+            .section-header h2 { font-size: 30px; }
+            .cta-banner { padding: 80px 0; }
+            .cta-content h2 { font-size: 30px; }
+        }
+
+        @@media (max-width: 520px) {
+            .portal-grid { grid-template-columns: 1fr; }
+            .stats-grid { grid-template-columns: 1fr; }
+            .dept-grid { grid-template-columns: 1fr; }
+            .news-grid { grid-template-columns: 1fr; }
+            .footer-grid { grid-template-columns: 1fr; }
+            .footer-bottom { flex-direction: column; gap: 12px; text-align: center; }
+            .hero-buttons { flex-direction: column; width: 100%; }
+            .btn-custom { width: 100%; justify-content: center; }
+            .badge-1, .badge-2 { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== HEADER/NAVBAR ===== -->
+    <header id="mainNavbar" class="navbar-header">
+        <div class="container navbar-container">
+            <a asp-controller="Home" asp-action="Index" class="navbar-brand">
+                <div class="navbar-brand-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                HiSUP
+            </a>
+            
+            <nav>
+                <ul class="navbar-menu">
+                    <li><a href="#about" class="navbar-link">About</a></li>
+                    <li><a href="#portals" class="navbar-link">Portals</a></li>
+                    <li><a href="#departments" class="navbar-link">Departments</a></li>
+                    <li><a href="#news" class="navbar-link">Announcements</a></li>
+                </ul>
+            </nav>
+
+            <div class="navbar-actions">
+                @if (User.Identity.IsAuthenticated)
                 {
-                    <a asp-controller="Dashboard" asp-action="Index" class="btn-primary-custom" id="cta-dashboard">
-                        <i class="fas fa-chart-pie"></i> Go to Dashboard
+                    if (User.IsInRole("Student"))
+                    {
+                        <a asp-controller="Dashboard" asp-action="Index" class="btn-custom btn-custom-primary" id="cta-dashboard">
+                            <i class="fas fa-chart-pie"></i> Student Dashboard
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-controller="AdminPortal" asp-action="Index" class="btn-custom btn-custom-primary" id="cta-admin">
+                            <i class="fas fa-cogs"></i> Control Panel
+                        </a>
+                    }
+                }
+                else
+                {
+                    <a asp-controller="Account" asp-action="Login" class="btn-custom btn-custom-outline" id="cta-login">
+                        <i class="fas fa-right-to-bracket"></i> Sign In
+                    </a>
+                    <a asp-controller="Enrollment" asp-action="Index" class="btn-custom btn-custom-primary" id="cta-browse">
+                        <i class="fas fa-book-open"></i> Browse Courses
+                    </a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== HERO SECTION ===== -->
+    <section class="hero" id="about">
+        <div class="container hero-grid">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <i class="fas fa-certificate"></i> Academic Information System
+                </div>
+                <h1 class="hero-title">Empowering Your <span>Academic Journey</span> At HITEC</h1>
+                <p class="hero-description">
+                    Welcome to the HITEC University Student Information System (HiSUP). 
+                    A unified and secure hub built for course enrollment, real-time academic records tracking, 
+                    department management, library access, and financial statements checking.
+                </p>
+                <div class="hero-buttons">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        if (User.IsInRole("Student"))
+                        {
+                            <a asp-controller="Dashboard" asp-action="Index" class="btn-custom btn-custom-primary">
+                                <i class="fas fa-arrow-right"></i> Go to My Dashboard
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="AdminPortal" asp-action="Index" class="btn-custom btn-custom-primary">
+                                <i class="fas fa-arrow-right"></i> Go to Control Panel
+                            </a>
+                        }
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn-custom btn-custom-primary">
+                            <i class="fas fa-sign-in-alt"></i> Sign In to Portal
+                        </a>
+                    }
+                    <a href="#portals" class="btn-custom btn-custom-outline">
+                        Explore Services
+                    </a>
+                </div>
+            </div>
+            
+            <div class="hero-image-wrapper">
+                <div class="hero-image-card">
+                    <img src="~/images/hitec_hero.png" alt="HITEC Campus Illustration" class="hero-image" />
+                </div>
+                
+                <!-- Floating Glass Card 1 -->
+                <div class="hero-floating-badge badge-1">
+                    <div class="floating-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="floating-info">
+                        <h5>Safe &amp; Concurrent</h5>
+                        <p>Optimized Database System</p>
+                    </div>
+                </div>
+
+                <!-- Floating Glass Card 2 -->
+                <div class="hero-floating-badge badge-2">
+                    <div class="floating-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="floating-info">
+                        <h5>Row-Level Security</h5>
+                        <p>Fully Protected Records</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== PORTAL ROADWAYS ===== -->
+    <section class="portals" id="portals">
+        <div class="container">
+            <div class="section-header">
+                <h2>Access Portal Gateways</h2>
+                <p>Select your dashboard target gateway path to log in and access custom student and administrative features.</p>
+            </div>
+            
+            <div class="portal-grid">
+                <!-- Student Card -->
+                <div class="portal-card student" onclick="navigateToLogin('student')">
+                    <div class="portal-icon">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3>Student Portal</h3>
+                    <p>Track academic status, semester enrollment, hostel housing, and fee schedules.</p>
+                    <div class="portal-link">
+                        Enter Gateway <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Faculty Card -->
+                <div class="portal-card faculty" onclick="navigateToLogin('faculty')">
+                    <div class="portal-icon">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    <h3>Faculty Portal</h3>
+                    <p>Manage courses taught, grade student enrollments, and check department directories.</p>
+                    <div class="portal-link">
+                        Enter Gateway <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Finance Card -->
+                <div class="portal-card finance" onclick="navigateToLogin('finance')">
+                    <div class="portal-icon">
+                        <i class="fas fa-coins"></i>
+                    </div>
+                    <h3>Finance Services</h3>
+                    <p>Oversee outstanding fee collections, balance books, and verify payment slips.</p>
+                    <div class="portal-link">
+                        Enter Gateway <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+
+                <!-- Admin Card -->
+                <div class="portal-card admin" onclick="navigateToLogin('admin')">
+                    <div class="portal-icon">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <h3>System Admin</h3>
+                    <p>Configure academic plans, inspect system audit logs, and override database lock variables.</p>
+                    <div class="portal-link">
+                        Enter Gateway <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== DATABASE STATS GRID ===== -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <!-- Stat 1 -->
+                <div class="stat-card">
+                    <div class="stat-card-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-number" data-target="@ViewBag.TotalStudents">0</div>
+                    <div class="stat-label">Enrolled Students</div>
+                </div>
+                <!-- Stat 2 -->
+                <div class="stat-card">
+                    <div class="stat-card-icon"><i class="fas fa-book-bookmark"></i></div>
+                    <div class="stat-number" data-target="@ViewBag.TotalCourses">0</div>
+                    <div class="stat-label">Offered Courses</div>
+                </div>
+                <!-- Stat 3 -->
+                <div class="stat-card">
+                    <div class="stat-card-icon"><i class="fas fa-chalkboard-user"></i></div>
+                    <div class="stat-number" data-target="@ViewBag.TotalFaculty">0</div>
+                    <div class="stat-label">Academic Faculty</div>
+                </div>
+                <!-- Stat 4 -->
+                <div class="stat-card">
+                    <div class="stat-card-icon"><i class="fas fa-book-open-reader"></i></div>
+                    <div class="stat-number" data-target="@ViewBag.TotalBooks">0</div>
+                    <div class="stat-label">Library Volumes</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== DEPARTMENTS SHOWCASE ===== -->
+    <section class="departments" id="departments">
+        <div class="container">
+            <div class="section-header">
+                <h2>Explore Academic Departments</h2>
+                <p>Outstanding programs focused on practical skills, research publications, and professional ethics.</p>
+            </div>
+            
+            <div class="dept-grid">
+                <!-- CS -->
+                <div class="dept-card cs">
+                    <div class="dept-image-area">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <div class="dept-content">
+                        <h3 class="dept-title">Computer Science</h3>
+                        <p class="dept-desc">Innovating future software engineering, database technologies, artificial intelligence architectures, and concurrent systems development.</p>
+                        <div class="dept-info-badges">
+                            <span class="dept-badge"><i class="fas fa-shield"></i> NCEAC Accredited</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EE -->
+                <div class="dept-card ee">
+                    <div class="dept-image-area">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="dept-content">
+                        <h3 class="dept-title">Electrical Engineering</h3>
+                        <p class="dept-desc">Delivering hands-on microcontrollers training, telecommunication engineering paradigms, power grids, and digital systems controllers.</p>
+                        <div class="dept-info-badges">
+                            <span class="dept-badge"><i class="fas fa-award"></i> PEC Level-II</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ME -->
+                <div class="dept-card me">
+                    <div class="dept-image-area">
+                        <i class="fas fa-gears"></i>
+                    </div>
+                    <div class="dept-content">
+                        <h3 class="dept-title">Mechanical Engineering</h3>
+                        <p class="dept-desc">Specializing in thermal energy designs, industrial aerodynamics, state-of-the-art automation systems, and advanced CAD/CAM simulations.</p>
+                        <div class="dept-info-badges">
+                            <span class="dept-badge"><i class="fas fa-award"></i> PEC Level-II</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== NEWS & ANNOUNCEMENTS ===== -->
+    <section class="news" id="news">
+        <div class="container">
+            <div class="section-header">
+                <h2>Latest Announcements</h2>
+                <p>Stay up to date with the latest developments, registrations, and exam timelines at HITEC University.</p>
+            </div>
+            
+            <div class="news-grid">
+                <!-- News 1 -->
+                <div class="news-card">
+                    <div class="news-img" style="background-image: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(124, 70, 229, 0.2))"></div>
+                    <div class="news-content">
+                        <span class="news-date">Admissions Open</span>
+                        <h3 class="news-title">Fall Semester 2026 Admissions Open</h3>
+                        <p class="news-desc">Online enrollment forms are now available. Interested candidates can apply for CS, EE, ME, and Business programs starting today.</p>
+                    </div>
+                </div>
+
+                <!-- News 2 -->
+                <div class="news-card">
+                    <div class="news-img" style="background-image: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(6, 100, 212, 0.2))"></div>
+                    <div class="news-content">
+                        <span class="news-date">Examinations</span>
+                        <h3 class="news-title">Final Examinations Schedule Announced</h3>
+                        <p class="news-desc">The exams schedule for the current semester is finalized. Students can view dates via their personal student dashboards starting next Monday.</p>
+                    </div>
+                </div>
+
+                <!-- News 3 -->
+                <div class="news-card">
+                    <div class="news-img" style="background-image: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 100, 129, 0.2))"></div>
+                    <div class="news-content">
+                        <span class="news-date">Campus Event</span>
+                        <h3 class="news-title">HITEC Annual Convocation 2026</h3>
+                        <p class="news-desc">The annual convocation ceremony invitations are being sent out. Graduate registration forms must be filled out before the deadline.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CALL TO ACTION ===== -->
+    <section class="cta-banner">
+        <div class="cta-content">
+            <h2>Ready to Access Your Portal?</h2>
+            <p>Log in using your registered university credentials or browse the public directory of course offerings.</p>
+            <div style="display: flex; gap: 16px; justify-content: center; margin-top: 24px;">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <a asp-controller="Dashboard" asp-action="Index" class="btn-custom btn-white">
+                        Go to Portal <i class="fas fa-arrow-right"></i>
                     </a>
                 }
                 else
                 {
-                    <a asp-controller="AdminPortal" asp-action="Index" class="btn-primary-custom" id="cta-admin">
-                        <i class="fas fa-cogs"></i> Enter Portal Control Panel
+                    <a asp-controller="Account" asp-action="Login" class="btn-custom btn-white">
+                        Sign In Now <i class="fas fa-sign-in-alt"></i>
+                    </a>
+                    <a asp-controller="Enrollment" asp-action="Index" class="btn-custom btn-custom-outline" style="color:#ffffff; border-color:#ffffff;">
+                        Browse Courses
                     </a>
                 }
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer-site">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col footer-about">
+                    <h4 style="display:flex; align-items:center; gap:8px;">
+                        <span style="color:var(--primary);"><i class="fas fa-graduation-cap"></i></span> HITEC University
+                    </h4>
+                    <p>A leading higher education institution dedicated to academic rigor, state-of-the-art engineering instruction, and ethical research.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-btn"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-btn"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-btn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" class="social-btn"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="#about">About Campus</a></li>
+                        <li><a asp-controller="Enrollment" asp-action="Index">Course Search</a></li>
+                        <li><a asp-controller="Home" asp-action="Privacy">Privacy Policy</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Gateways</h4>
+                    <ul class="footer-links">
+                        <li><a asp-controller="Account" asp-action="Login">Student Login</a></li>
+                        <li><a asp-controller="Account" asp-action="Login">Faculty Login</a></li>
+                        <li><a asp-controller="Account" asp-action="Login">Administrative Access</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Contact Info</h4>
+                    <ul class="contact-info">
+                        <li>
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>HITEC University campus, Taxila Cantt, Punjab, Pakistan</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-phone"></i>
+                            <span>+92 (51) 490-8146</span>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope"></i>
+                            <span>info@hitec.edu.pk</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <div>&copy; 2026 HiSUP — HITEC University Student Portal. All rights reserved.</div>
+                <div>Advanced Database Project</div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling & active navbar highlights
+        window.addEventListener('scroll', function() {
+            var nav = document.getElementById('mainNavbar');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
             }
-            else
-            {
-                <a asp-controller="Account" asp-action="Login" class="btn-primary-custom" id="cta-login">
-                    <i class="fas fa-right-to-bracket"></i> Sign In to Portal
-                </a>
-            }
-            <a asp-controller="Enrollment" asp-action="Index" class="btn-outline-custom" id="cta-enrollment">
-                <i class="fas fa-book-open"></i> Browse Courses
-            </a>
-        </div>
-    </div>
-</section>
+        });
 
-<!-- Stats Grid -->
-<div class="stats-grid fade-in" style="margin-bottom: 48px;">
-    <div class="stats-card">
-        <div class="stats-icon" style="background: linear-gradient(135deg, #4f8cff, #3b6de0);">
-            <i class="fas fa-user-graduate"></i>
-        </div>
-        <div class="stats-info">
-            <div class="stats-label">Active Students</div>
-            <div class="stats-value counter" data-target="@ViewBag.TotalStudents">0</div>
-        </div>
-    </div>
-    <div class="stats-card">
-        <div class="stats-icon" style="background: linear-gradient(135deg, #7c5cfc, #6344e0);">
-            <i class="fas fa-book"></i>
-        </div>
-        <div class="stats-info">
-            <div class="stats-label">Courses Offered</div>
-            <div class="stats-value counter" data-target="@ViewBag.TotalCourses">0</div>
-        </div>
-    </div>
-    <div class="stats-card">
-        <div class="stats-icon" style="background: linear-gradient(135deg, #00d68f, #00b876);">
-            <i class="fas fa-chalkboard-teacher"></i>
-        </div>
-        <div class="stats-info">
-            <div class="stats-label">Faculty Members</div>
-            <div class="stats-value counter" data-target="@ViewBag.TotalFaculty">0</div>
-        </div>
-    </div>
-    <div class="stats-card">
-        <div class="stats-icon" style="background: linear-gradient(135deg, #ffaa2c, #e6941e);">
-            <i class="fas fa-book-reader"></i>
-        </div>
-        <div class="stats-info">
-            <div class="stats-label">Library Books</div>
-            <div class="stats-value counter" data-target="@ViewBag.TotalBooks">0</div>
-        </div>
-    </div>
-</div>
+        // Numeric counters animation
+        document.addEventListener('DOMContentLoaded', function() {
+            var counterElements = document.querySelectorAll('.stat-number');
+            
+            var observer = new IntersectionObserver(function(entries) {
+                entries.forEach(function(entry) {
+                    if (entry.isIntersecting) {
+                        var target = entry.target;
+                        var countTo = parseInt(target.getAttribute('data-target'));
+                        var duration = 1500; // ms
+                        var start = 0;
+                        var stepTime = Math.abs(Math.floor(duration / countTo));
+                        stepTime = Math.max(stepTime, 20); // minimum 20ms intervals
+                        
+                        var timer = setInterval(function() {
+                            start += Math.ceil(countTo / (duration / stepTime));
+                            if (start >= countTo) {
+                                target.textContent = countTo;
+                                clearInterval(timer);
+                            } else {
+                                target.textContent = start;
+                            }
+                        }, stepTime);
+                        
+                        observer.unobserve(target);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            counterElements.forEach(function(el) {
+                observer.observe(el);
+            });
+        });
 
-<!-- Features Section -->
-<div class="section-header fade-in">
-    <h2 class="section-title">Platform Features</h2>
-    <p class="section-subtitle">Everything you need to manage your academic life</p>
-</div>
-<div class="features-grid">
-    <div class="feature-card fade-in fade-in-delay-1">
-        <div class="feature-icon blue">
-            <i class="fas fa-chart-pie"></i>
-        </div>
-        <h3>Student Dashboard</h3>
-        <p>View your enrolled courses, track semester progress, and monitor financial records — all in real-time from a secure SQL view.</p>
-    </div>
-    <div class="feature-card fade-in fade-in-delay-2">
-        <div class="feature-icon violet">
-            <i class="fas fa-book-open"></i>
-        </div>
-        <h3>Course Enrollment</h3>
-        <p>Browse available courses, check live seat availability, and enroll instantly via a concurrent-safe stored procedure.</p>
-    </div>
-    <div class="feature-card fade-in fade-in-delay-3">
-        <div class="feature-icon cyan">
-            <i class="fas fa-shield-halved"></i>
-        </div>
-        <h3>Secure by Design</h3>
-        <p>Row-Level Security ensures every student only sees their own data. Enterprise-grade SQL Server features protect your records.</p>
-    </div>
-</div>
-
-<!-- How It Works Section -->
-<div class="section-header fade-in">
-    <h2 class="section-title">How It Works</h2>
-    <p class="section-subtitle">Get started in three simple steps</p>
-</div>
-<div class="steps-grid fade-in">
-    <div class="step-card">
-        <div class="step-number">1</div>
-        <h4>Sign In</h4>
-        <p>Login with your university credentials to access your personalized portal.</p>
-    </div>
-    <div class="step-card">
-        <div class="step-number">2</div>
-        <h4>Browse &amp; Enroll</h4>
-        <p>Explore available courses for the current semester and enroll with one click.</p>
-    </div>
-    <div class="step-card">
-        <div class="step-number">3</div>
-        <h4>Track Progress</h4>
-        <p>Monitor your enrollments, fees, and academic progress on your dashboard.</p>
-    </div>
-</div>
+        // Redirect helper for role login selections
+        function navigateToLogin(role) {
+            window.location.href = '@Url.Action("Login", "Account")';
+        }
+    </script>
+</body>
+</html>
