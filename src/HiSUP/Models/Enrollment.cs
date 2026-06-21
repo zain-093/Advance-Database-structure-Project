@@ -13,10 +13,20 @@ namespace HiSUP.Models
 
         public int? SectionID { get; set; }
 
+        public int? CourseID { get; set; }
+
+        [ForeignKey("CourseID")]
+        public virtual Course? Course { get; set; }
+
+        [StringLength(20)]
+        public string? Semester { get; set; }
+
+        public DateTime? EnrollmentDate { get; set; }
+
         [ForeignKey("StudentID")]
-        public virtual Student Student { get; set; }
+        public virtual Student? Student { get; set; }
 
         [ForeignKey("SectionID")]
-        public virtual Section Section { get; set; }
+        public virtual Section? Section { get; set; }
     }
 }

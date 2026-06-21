@@ -178,8 +178,12 @@
 
         .roles-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 14px;
+        }
+        .roles-grid .role-card:nth-child(4),
+        .roles-grid .role-card:nth-child(5) {
+            /* Center the last row of 2 cards in a 3-col grid */
         }
 
         .role-card {
@@ -218,11 +222,13 @@
         .role-card.student::before  { background: linear-gradient(135deg, rgba(6,182,212,0.06), rgba(59,130,246,0.06)); }
         .role-card.faculty::before  { background: linear-gradient(135deg, rgba(16,185,129,0.06), rgba(5,150,105,0.06)); }
         .role-card.finance::before  { background: linear-gradient(135deg, rgba(245,158,11,0.06), rgba(234,88,12,0.06)); }
+        .role-card.library::before  { background: linear-gradient(135deg, rgba(168,85,247,0.06), rgba(139,92,246,0.06)); }
 
         .role-card.admin:hover    { border-color: #4F46E5; }
         .role-card.student:hover  { border-color: #06B6D4; }
         .role-card.faculty:hover  { border-color: #10B981; }
         .role-card.finance:hover  { border-color: #F59E0B; }
+        .role-card.library:hover  { border-color: #A855F7; }
 
         .role-icon {
             width: 52px; height: 52px;
@@ -240,6 +246,7 @@
         .role-card.student .role-icon  { background: linear-gradient(135deg, #06B6D4, #3B82F6); box-shadow: 0 4px 16px rgba(6,182,212,0.25); }
         .role-card.faculty .role-icon  { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 4px 16px rgba(16,185,129,0.25); }
         .role-card.finance .role-icon  { background: linear-gradient(135deg, #F59E0B, #EA580C); box-shadow: 0 4px 16px rgba(245,158,11,0.25); }
+        .role-card.library .role-icon  { background: linear-gradient(135deg, #A855F7, #8B5CF6); box-shadow: 0 4px 16px rgba(168,85,247,0.25); }
 
         .role-card h3 {
             font-size: 15px;
@@ -289,6 +296,7 @@
         .selected-role-badge.student  { background: rgba(6,182,212,0.08); color: #0891B2; }
         .selected-role-badge.faculty  { background: rgba(16,185,129,0.08); color: #059669; }
         .selected-role-badge.finance  { background: rgba(245,158,11,0.08); color: #D97706; }
+        .selected-role-badge.library  { background: rgba(168,85,247,0.08); color: #7C3AED; }
 
         .selected-role-badge i { font-size: 14px; }
 
@@ -376,6 +384,7 @@
         .btn-login.student  { background: linear-gradient(135deg, #06B6D4, #3B82F6); box-shadow: 0 4px 16px rgba(6,182,212,0.3); }
         .btn-login.faculty  { background: linear-gradient(135deg, #10B981, #059669); box-shadow: 0 4px 16px rgba(16,185,129,0.3); }
         .btn-login.finance  { background: linear-gradient(135deg, #F59E0B, #EA580C); box-shadow: 0 4px 16px rgba(245,158,11,0.3); }
+        .btn-login.library  { background: linear-gradient(135deg, #A855F7, #8B5CF6); box-shadow: 0 4px 16px rgba(168,85,247,0.3); }
 
         .btn-login:hover { transform: translateY(-2px); filter: brightness(1.05); }
         .btn-login:active { transform: translateY(0); }
@@ -464,10 +473,13 @@
         }
 
         /* ===== RESPONSIVE ===== */
+        @@media (max-width: 640px) {
+            .roles-grid { grid-template-columns: 1fr 1fr; }
+        }
         @@media (max-width: 480px) {
             body { padding: 16px; }
             .login-card { padding: 28px 24px; border-radius: 20px; }
-            .roles-grid { gap: 10px; }
+            .roles-grid { gap: 10px; grid-template-columns: 1fr 1fr; }
             .role-card { padding: 20px 12px; }
             .role-icon { width: 44px; height: 44px; font-size: 18px; }
             .brand-header h1 { font-size: 22px; }
@@ -529,6 +541,14 @@
                         </div>
                         <h3>Finance</h3>
                         <span>Financial Services</span>
+                    </div>
+
+                    <div class="role-card library" onclick="selectRole('library')" id="role-library">
+                        <div class="role-icon">
+                            <i class="fas fa-book-open-reader"></i>
+                        </div>
+                        <h3>Librarian</h3>
+                        <span>Library Management</span>
                     </div>
                 </div>
             </div>
@@ -607,6 +627,10 @@
                                 <span class="label">Finance</span>
                                 <div><code>finance</code> / <code>finance123</code></div>
                             </div>
+                            <div class="demo-cred-item">
+                                <span class="label">Librarian</span>
+                                <div><code>librarian</code> / <code>password</code></div>
+                            </div>
                         </div>
                     </details>
                 </div>
@@ -623,10 +647,11 @@
     <script>
         // Role configuration
         var roleConfig = {
-            admin:   { icon: 'fa-shield-halved', label: 'Admin',   hint: 'Enter your admin credentials to continue',            placeholder: 'e.g. admin' },
-            student: { icon: 'fa-user-graduate',  label: 'Student', hint: 'Enter your registration number and password',          placeholder: 'e.g. 22-CS-1000' },
+            admin:   { icon: 'fa-shield-halved', label: 'Admin',     hint: 'Enter your admin credentials to continue',            placeholder: 'e.g. admin' },
+            student: { icon: 'fa-user-graduate',  label: 'Student',   hint: 'Enter your registration number and password',          placeholder: 'e.g. 22-CS-1000' },
             faculty: { icon: 'fa-chalkboard-teacher', label: 'Faculty', hint: 'Enter your faculty email and password',            placeholder: 'e.g. jane.smith@hitec.edu' },
-            finance: { icon: 'fa-coins',          label: 'Finance', hint: 'Enter your finance department credentials',            placeholder: 'e.g. finance' }
+            finance: { icon: 'fa-coins',          label: 'Finance',   hint: 'Enter your finance department credentials',            placeholder: 'e.g. finance' },
+            library: { icon: 'fa-book-open-reader', label: 'Librarian', hint: 'Enter your librarian credentials to continue',     placeholder: 'e.g. librarian' }
         };
 
         var selectedRole = 'admin';

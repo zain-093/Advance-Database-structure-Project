@@ -18,6 +18,9 @@ namespace HiSUP.Models
         public string PasswordHash { get; set; }
 
         [StringLength(20)]
+        [Column("Role")]
         public string RoleName { get; set; }
+
+        public int ReferenceID { get; set; }
     }
 }

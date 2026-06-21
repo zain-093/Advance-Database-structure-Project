@@ -23,6 +23,12 @@ namespace HiSUP.Models
         public List<EnrollmentDetailsViewModel> Enrollments { get; set; } = new();
         public List<FeePayment> FeePayments { get; set; } = new();
         public List<LibraryIssueDetailsViewModel> LibraryIssues { get; set; } = new();
+
+        // New: Attendance, Results, Notifications, Documents
+        public List<AttendanceDetailViewModel> AttendanceRecords { get; set; } = new();
+        public List<Result> SemesterResults { get; set; } = new();
+        public List<Notification> Notifications { get; set; } = new();
+        public List<StudentDocument> Documents { get; set; } = new();
     }
 
     public class EnrollmentDetailsViewModel
@@ -45,5 +51,14 @@ namespace HiSUP.Models
         public DateTime IssueDate { get; set; }
         public DateTime? ReturnDate { get; set; }
         public string Status => ReturnDate.HasValue ? "Returned" : "Borrowed";
+    }
+
+    public class AttendanceDetailViewModel
+    {
+        public int AttendanceID { get; set; }
+        public string CourseName { get; set; }
+        public string CourseCode { get; set; }
+        public DateTime AttendanceDate { get; set; }
+        public string Status { get; set; }
     }
 }

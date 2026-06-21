@@ -17,5 +17,7 @@ namespace HiSUP.Models
 
         [ForeignKey("DepartmentID")]
         public virtual Department Department { get; set; }
+
+        public int? TotalSemesters { get; set; }
     }
 }

@@ -16,7 +16,16 @@ namespace HiSUP.Models
 
         public DateTime? PaymentDate { get; set; }
 
+        [Required]
+        [StringLength(50)]
+        public string PaymentMethod { get; set; }
+
+        public int FeeID { get; set; }
+
+        [ForeignKey("FeeID")]
+        public virtual FeeStructure? FeeStructure { get; set; }
+
         [ForeignKey("StudentID")]
-        public virtual Student Student { get; set; }
+        public virtual Student? Student { get; set; }
     }
 }

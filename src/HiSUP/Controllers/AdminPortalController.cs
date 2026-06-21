@@ -4,11 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using HiSUP.Data;
 using HiSUP.Models;
 using System;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace HiSUP.Controllers
 {
-    [Authorize(Roles = "Admin,Faculty,Finance")]
+    [Authorize(Roles = "Admin,Faculty,Finance,Library")]
     public class AdminPortalController : Controller
     {
         private readonly HiSUPContext _context;
@@ -21,6 +23,32 @@ namespace HiSUP.Controllers
         [HttpGet]
         public async Task<IActionResult> Index()
         {
+            bool isFaculty = User.IsInRole("Faculty");
+            int currentFacultyId = 0;
+
+            if (isFaculty)
+            {
+                var fIdClaim = User.FindFirst("FacultyID")?.Value;
+                if (!string.IsNullOrEmpty(fIdClaim))
+                    currentFacultyId = int.Parse(fIdClaim);
+            }
+
+            // Load all base data
+            var allSections = await _context.Sections.Include(s => s.Course).Include(s => s.Faculty).ToListAsync();
+            var allEnrollments = await _context.Enrollments.Include(e => e.Student).Include(e => e.Section).ThenInclude(sec => sec.Course).ToListAsync();
+            var allGrades = await _context.Grades.Include(g => g.Enrollment).ThenInclude(e => e.Student).Include(g => g.Enrollment).ThenInclude(e => e.Section).ThenInclude(sec => sec.Course).ToListAsync();
+            var allAttendance = await _context.AttendanceRecords.Include(ar => ar.Student).Include(ar => ar.Section).ThenInclude(sec => sec.Course).ToListAsync();
+
+            // If Faculty, filter to their assigned sections only
+            if (isFaculty && currentFacultyId > 0)
+            {
+                var facultySectionIds = allSections.Where(s => s.FacultyID == currentFacultyId).Select(s => s.SectionID).ToHashSet();
+                allSections = allSections.Where(s => s.FacultyID == currentFacultyId).ToList();
+                allEnrollments = allEnrollments.Where(e => facultySectionIds.Contains(e.SectionID ?? 0)).ToList();
+                allGrades = allGrades.Where(g => g.Enrollment != null && facultySectionIds.Contains(g.Enrollment.SectionID ?? 0)).ToList();
+                allAttendance = allAttendance.Where(a => facultySectionIds.Contains(a.SectionID ?? 0)).ToList();
+            }
+
             var model = new AdminPortalViewModel
             {
                 Departments = await _context.Departments.ToListAsync(),
@@ -33,10 +61,10 @@ namespace HiSUP.Controllers
                     .Include(cp => cp.Course)
                     .Include(cp => cp.PrerequisiteCourse)
                     .ToListAsync(),
-                Sections = await _context.Sections.Include(s => s.Course).Include(s => s.Faculty).ToListAsync(),
-                Enrollments = await _context.Enrollments.Include(e => e.Student).Include(e => e.Section).ThenInclude(sec => sec.Course).ToListAsync(),
-                Grades = await _context.Grades.Include(g => g.Enrollment).ThenInclude(e => e.Student).Include(g => g.Enrollment).ThenInclude(e => e.Section).ThenInclude(sec => sec.Course).ToListAsync(),
-                AttendanceRecords = await _context.AttendanceRecords.Include(ar => ar.Student).Include(ar => ar.Section).ThenInclude(sec => sec.Course).ToListAsync(),
+                Sections = allSections,
+                Enrollments = allEnrollments,
+                Grades = allGrades,
+                AttendanceRecords = allAttendance,
                 FeeStructures = await _context.FeeStructures.Include(fs => fs.Program).ToListAsync(),
                 FeePayments = await _context.FeePayments.Include(fp => fp.Student).ToListAsync(),
                 LibraryItems = await _context.LibraryItems.ToListAsync(),
@@ -51,6 +79,21 @@ namespace HiSUP.Controllers
                 StudentDocuments = await _context.StudentDocuments.Include(sd => sd.Student).ToListAsync()
             };
 
+            // Compute Admin KPIs
+            model.TotalFeeCollected = model.FeePayments.Sum(fp => fp.AmountPaid ?? 0);
+            model.HostelOccupancy = model.HostelAllotments.Count;
+            model.TotalLibraryBooks = model.LibraryItems.Sum(li => li.CopiesAvailable ?? 0);
+
+            // Faculty-specific stats
+            if (isFaculty && currentFacultyId > 0)
+            {
+                var faculty = model.Faculty.FirstOrDefault(f => f.FacultyID == currentFacultyId);
+                model.FacultyName = faculty != null ? $"{faculty.FirstName} {faculty.LastName}" : "Faculty";
+                model.FacultySections = model.Sections.Count;
+                model.FacultyAssignedCourses = model.Sections.Select(s => s.CourseID).Distinct().Count();
+                model.FacultyStudentCount = model.Enrollments.Select(e => e.StudentID).Distinct().Count();
+            }
+
             return View(model);
         }
 
@@ -60,6 +103,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateDepartment(Department department)
         {
             if (ModelState.IsValid)
@@ -73,6 +117,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteDepartment(int id)
         {
             var item = await _context.Departments.FindAsync(id);
@@ -87,6 +132,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateProgram(AcademicProgram program)
         {
             if (ModelState.IsValid)
@@ -100,6 +146,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteProgram(int id)
         {
             var item = await _context.Programs.FindAsync(id);
@@ -114,6 +161,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateCourse(Course course)
         {
             if (ModelState.IsValid)
@@ -127,6 +175,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteCourse(int id)
         {
             var item = await _context.Courses.FindAsync(id);
@@ -141,6 +190,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateSection(Section section)
         {
             if (ModelState.IsValid)
@@ -154,6 +204,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteSection(int id)
         {
             var item = await _context.Sections.FindAsync(id);
@@ -172,6 +223,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateStudent(Student student)
         {
             if (ModelState.IsValid)
@@ -185,6 +237,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteStudent(int id)
         {
             var item = await _context.Students.FindAsync(id);
@@ -199,6 +252,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateFaculty(Faculty faculty)
         {
             if (ModelState.IsValid)
@@ -212,6 +266,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteFaculty(int id)
         {
             var item = await _context.Faculty.FindAsync(id);
@@ -226,6 +281,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateStaff(Staff staff)
         {
             if (ModelState.IsValid)
@@ -239,6 +295,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteStaff(int id)
         {
             var item = await _context.Staffs.FindAsync(id);
@@ -257,6 +314,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateEnrollment(Enrollment enrollment)
         {
             if (ModelState.IsValid)
@@ -270,6 +328,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteEnrollment(int id)
         {
             var item = await _context.Enrollments.FindAsync(id);
@@ -284,6 +343,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Faculty")]
         public async Task<IActionResult> CreateGrade(Grade grade)
         {
             if (ModelState.IsValid)
@@ -297,6 +357,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Faculty")]
         public async Task<IActionResult> DeleteGrade(int id)
         {
             var item = await _context.Grades.FindAsync(id);
@@ -311,6 +372,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Faculty")]
         public async Task<IActionResult> CreateAttendance(AttendanceRecord attendance)
         {
             attendance.AttendanceDate = DateTime.Now.Date;
@@ -325,6 +387,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Faculty")]
         public async Task<IActionResult> DeleteAttendance(int id)
         {
             var item = await _context.AttendanceRecords.FindAsync(id);
@@ -343,6 +406,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Finance")]
         public async Task<IActionResult> CreateFeeStructure(FeeStructure feeStructure)
         {
             if (ModelState.IsValid)
@@ -356,6 +420,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Finance")]
         public async Task<IActionResult> DeleteFeeStructure(int id)
         {
             var item = await _context.FeeStructures.FindAsync(id);
@@ -370,6 +435,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Finance")]
         public async Task<IActionResult> CreateFeePayment(FeePayment feePayment)
         {
             feePayment.PaymentDate = DateTime.Now;
@@ -384,6 +450,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Finance")]
         public async Task<IActionResult> DeleteFeePayment(int id)
         {
             var item = await _context.FeePayments.FindAsync(id);
@@ -402,6 +469,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Library")]
         public async Task<IActionResult> CreateLibraryItem(LibraryItem libraryItem)
         {
             if (ModelState.IsValid)
@@ -415,6 +483,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Library")]
         public async Task<IActionResult> DeleteLibraryItem(int id)
         {
             var item = await _context.LibraryItems.FindAsync(id);
@@ -429,6 +498,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Library")]
         public async Task<IActionResult> CreateLibraryIssue(LibraryIssue libraryIssue)
         {
             libraryIssue.IssueDate = DateTime.Now.Date;
@@ -444,6 +514,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin,Library")]
         public async Task<IActionResult> ReturnLibraryBook(int id)
         {
             var item = await _context.LibraryIssues.FindAsync(id);
@@ -458,6 +529,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateHostel(Hostel hostel)
         {
             if (ModelState.IsValid)
@@ -471,6 +543,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteHostel(int id)
         {
             var item = await _context.Hostels.FindAsync(id);
@@ -485,6 +558,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateHostelAllotment(HostelAllotment hostelAllotment)
         {
             if (ModelState.IsValid)
@@ -498,6 +572,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteHostelAllotment(int id)
         {
             var item = await _context.HostelAllotments.FindAsync(id);
@@ -516,6 +591,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateExam(ExamSchedule exam)
         {
             if (ModelState.IsValid)
@@ -529,6 +605,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteExam(int id)
         {
             var item = await _context.ExamSchedules.FindAsync(id);
@@ -543,6 +620,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateResult(Result result)
         {
             if (ModelState.IsValid)
@@ -556,6 +634,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteResult(int id)
         {
             var item = await _context.Results.FindAsync(id);
@@ -570,6 +649,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateUserAccount(UserAccount account)
         {
             if (ModelState.IsValid)
@@ -583,6 +663,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteUserAccount(int id)
         {
             var item = await _context.UserAccounts.FindAsync(id);
@@ -597,6 +678,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateNotification(Notification notification)
         {
             if (ModelState.IsValid)
@@ -610,6 +692,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteNotification(int id)
         {
             var item = await _context.Notifications.FindAsync(id);
@@ -624,6 +707,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateDocument(StudentDocument document)
         {
             if (ModelState.IsValid)
@@ -637,6 +721,7 @@ namespace HiSUP.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteDocument(int id)
         {
             var item = await _context.StudentDocuments.FindAsync(id);

@@ -11,7 +11,7 @@ namespace HiSUP.Models
 
         public int? EnrollmentID { get; set; }
 
-        [Column(TypeName = "decimal(5,2)")]
+        [Column("MarksObtained", TypeName = "decimal(5,2)")]
         public decimal? Marks { get; set; }
 
         [StringLength(2)]

@@ -14,10 +14,13 @@ namespace HiSUP.Models
         [StringLength(20)]
         public string Semester { get; set; }
 
-        [Column(TypeName = "decimal(3,2)")]
+        [Column("SGPA", TypeName = "decimal(3,2)")]
         public decimal? GPA { get; set; }
 
+        [Column(TypeName = "decimal(3,2)")]
+        public decimal? CGPA { get; set; }
+
         [ForeignKey("StudentID")]
-        public virtual Student Student { get; set; }
+        public virtual Student? Student { get; set; }
     }
 }

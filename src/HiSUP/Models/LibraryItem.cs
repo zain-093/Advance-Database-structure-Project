@@ -15,6 +15,12 @@ namespace HiSUP.Models
         [StringLength(100)]
         public string Author { get; set; }
 
+        [StringLength(20)]
+        public string? ISBN { get; set; }
+
+        public int? TotalCopies { get; set; }
+
+        [Column("AvailableCopies")]
         public int? CopiesAvailable { get; set; }
     }
 }

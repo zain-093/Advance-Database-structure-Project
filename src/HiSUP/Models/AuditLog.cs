@@ -13,8 +13,17 @@ namespace HiSUP.Models
         public string TableName { get; set; }
 
         [StringLength(20)]
+        [Column("Action")]
         public string ActionType { get; set; }
 
+        [Column("LogTimestamp")]
         public DateTime? ActionDate { get; set; }
+
+        public string? OldValue { get; set; }
+
+        public string? NewValue { get; set; }
+
+        [StringLength(100)]
+        public string? DatabaseUser { get; set; }
     }
 }

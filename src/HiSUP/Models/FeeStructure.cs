@@ -11,10 +11,17 @@ namespace HiSUP.Models
 
         public int? ProgramID { get; set; }
 
-        [Column(TypeName = "decimal(10,2)")]
+        [Column("TuitionFee", TypeName = "decimal(10,2)")]
         public decimal? Amount { get; set; }
 
+        [Required]
+        [StringLength(20)]
+        public string Semester { get; set; }
+
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal? LibraryFee { get; set; }
+
         [ForeignKey("ProgramID")]
-        public virtual AcademicProgram Program { get; set; }
+        public virtual AcademicProgram? Program { get; set; }
     }
 }

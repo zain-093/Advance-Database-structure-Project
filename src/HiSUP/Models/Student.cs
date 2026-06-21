@@ -9,9 +9,8 @@ namespace HiSUP.Models
         [Key]
         public int StudentID { get; set; }
 
-        [Required]
         [StringLength(20)]
-        public string RegistrationNo { get; set; }
+        public string? RegistrationNo { get; set; }
 
         [Required]
         [StringLength(50)]
@@ -25,11 +24,22 @@ namespace HiSUP.Models
         public string Email { get; set; }
 
         [StringLength(20)]
-        public string Phone { get; set; }
+        public string? Phone { get; set; }
 
-        public int ProgramID { get; set; }
+        [StringLength(15)]
+        [Column("CNIC_ClearText")]
+        public string? CNIC_ClearText { get; set; }
+
+        public int DepartmentID { get; set; }
+
+        [ForeignKey("DepartmentID")]
+        public virtual Department? Department { get; set; }
+
+        public int? ProgramID { get; set; }
 
         [ForeignKey("ProgramID")]
-        public virtual AcademicProgram Program { get; set; }
+        public virtual AcademicProgram? Program { get; set; }
+
+        public DateTime? EnrollmentDate { get; set; }
     }
 }

@@ -14,12 +14,15 @@ namespace HiSUP.Models
         public int? HostelID { get; set; }
 
         [StringLength(20)]
+        [Column("RoomNumber")]
         public string RoomNo { get; set; }
 
+        public DateTime? AllotmentDate { get; set; }
+
         [ForeignKey("StudentID")]
-        public virtual Student Student { get; set; }
+        public virtual Student? Student { get; set; }
 
         [ForeignKey("HostelID")]
-        public virtual Hostel Hostel { get; set; }
+        public virtual Hostel? Hostel { get; set; }
     }
 }

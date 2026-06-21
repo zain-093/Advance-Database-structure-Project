@@ -1,14 +1,18 @@
-IF NOT EXISTS (SELECT * FROM sys.databases WHERE name = 'HiSUP_DB')
-BEGIN
-    CREATE DATABASE HiSUP_DB;
-END
-GO
+-- =========================================================================
+-- HITEC UNIVERSITY - ACADEMIC DATA MANAGEMENT SYSTEM (HiSUP)
+-- CONSOLIDATED SQL QUERIES FILE (all_queries.sql)
+--
+-- This file contains ALL SQL queries, DDL schemas, advanced DB objects, 
+-- DCL security policies, seed data, and application-level SQL statements 
+-- utilized in this project.
+-- =========================================================================
+
 USE HiSUP_DB;
 GO
 
--- ==========================================
--- 1. CREATE ALL TABLES WITH GUARDS
--- ==========================================
+-- =========================================================================
+-- SECTION 1: DATABASE & SCHEMA DDL (TABLE CREATIONS & CONSTRAINTS)
+-- =========================================================================
 
 -- A. Departments Table
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Departments')
@@ -352,12 +356,11 @@ END
 GO
 
 
+-- =========================================================================
+-- SECTION 2: ADVANCED DATABASE PROGRAMMATIC OBJECTS (VIEWS, PROCS, FUNCTIONS, TRIGGERS)
+-- =========================================================================
 
--- ==========================================
--- 2. CREATE VIEW, STORED PROCEDURE & TRIGGER
--- ==========================================
-
--- A. View: Student Dashboard
+-- A. View: Student Dashboard (Includes Window Functions)
 IF EXISTS (SELECT * FROM sys.views WHERE object_id = OBJECT_ID(N'[dbo].[vw_StudentDashboard]'))
     DROP VIEW [dbo].[vw_StudentDashboard];
 GO
@@ -381,7 +384,8 @@ LEFT JOIN dbo.Courses c ON e.CourseID = c.CourseID
 LEFT JOIN dbo.FeePayments fp ON s.StudentID = fp.StudentID;
 GO
 
--- B. Stored Procedure: EnrollInCourse
+
+-- B. Stored Procedure: EnrollInCourse (Includes Explicit Transaction & Concurrent Locking)
 IF EXISTS (SELECT * FROM sys.procedures WHERE object_id = OBJECT_ID(N'[dbo].[EnrollInCourse]'))
     DROP PROCEDURE [dbo].[EnrollInCourse];
 GO
@@ -394,12 +398,13 @@ AS
 BEGIN
     SET NOCOUNT ON;
     BEGIN TRY
-        -- Explicit transaction
+        -- Explicit Transaction
         BEGIN TRANSACTION;
 
-        -- Check if the course has available seats in ANY section this semester
         DECLARE @AvailableSeats INT;
         
+        -- Acquire a Shared Update Lock (UPDLOCK) under Serializable isolation level (SERIALIZABLE)
+        -- to prevent phantom reads or double bookings during high-concurrency registration
         SELECT @AvailableSeats = SUM(AvailableSeats)
         FROM Sections WITH (UPDLOCK, SERIALIZABLE)
         WHERE CourseID = @CourseID AND Semester = @Semester;
@@ -414,13 +419,15 @@ BEGIN
         COMMIT TRANSACTION;
     END TRY
     BEGIN CATCH
+        -- Rollback on failure
         IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
         THROW;
     END CATCH
 END;
 GO
 
--- C. Trigger: Student Audit Log
+
+-- C. Trigger: Student Audit Log (trg_AuditStudentUpdate)
 IF EXISTS (SELECT * FROM sys.triggers WHERE name = N'trg_AuditStudentUpdate')
     DROP TRIGGER trg_AuditStudentUpdate;
 GO
@@ -459,7 +466,8 @@ BEGIN
 END;
 GO
 
--- D. Trigger: Populate Enrollment Course and Semester from Section
+
+-- D. Trigger: Populate Enrollment Details from Sections
 IF EXISTS (SELECT * FROM sys.triggers WHERE name = N'trg_PopulateEnrollmentDetails')
     DROP TRIGGER trg_PopulateEnrollmentDetails;
 GO
@@ -480,7 +488,8 @@ BEGIN
 END;
 GO
 
--- E. Trigger: Populate Attendance Record EnrollmentID from Student and Section
+
+-- E. Trigger: Populate Attendance Record Linkage
 IF EXISTS (SELECT * FROM sys.triggers WHERE name = N'trg_PopulateAttendanceEnrollment')
     DROP TRIGGER trg_PopulateAttendanceEnrollment;
 GO
@@ -501,7 +510,7 @@ END;
 GO
 
 
--- F. Function: Calculate Student CGPA
+-- F. Function: Calculate Student CGPA (fn_CalculateCGPA)
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[fn_CalculateCGPA]') AND type in (N'FN', N'IF', N'TF', N'FS', N'FT'))
     DROP FUNCTION [dbo].[fn_CalculateCGPA];
 GO
@@ -548,7 +557,8 @@ BEGIN
 END;
 GO
 
--- G. Function: Get Student Outstanding Fee
+
+-- G. Function: Get Student Outstanding Fee (fn_GetOutstandingFee)
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[fn_GetOutstandingFee]') AND type in (N'FN', N'IF', N'TF', N'FS', N'FT'))
     DROP FUNCTION [dbo].[fn_GetOutstandingFee];
 GO
@@ -583,7 +593,8 @@ BEGIN
 END;
 GO
 
--- H. Function: Get Student Attendance Percentage
+
+-- H. Function: Get Student Attendance Percentage (fn_GetAttendancePercentage)
 IF EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[fn_GetAttendancePercentage]') AND type in (N'FN', N'IF', N'TF', N'FS', N'FT'))
     DROP FUNCTION [dbo].[fn_GetAttendancePercentage];
 GO
@@ -614,11 +625,11 @@ END;
 GO
 
 
--- ==========================================
--- 3. ROLES AND ROW-LEVEL SECURITY
--- ==========================================
+-- =========================================================================
+-- SECTION 3: DATABASE ROLES, PRIVILEGES, & ROW-LEVEL SECURITY (RLS)
+-- =========================================================================
 
--- A. Database Roles
+-- A. Database Roles Setup
 IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = 'db_student' AND type = 'R')
     CREATE ROLE db_student;
 IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = 'db_faculty' AND type = 'R')
@@ -629,10 +640,12 @@ IF NOT EXISTS (SELECT * FROM sys.database_principals WHERE name = 'db_finance' A
     CREATE ROLE db_finance;
 GO
 
--- Permissions
+-- Deny direct table access for students (forcing View and Stored Procedure usage)
 DENY SELECT ON dbo.Grades TO db_student;
 DENY SELECT ON dbo.FeePayments TO db_student;
 DENY SELECT ON dbo.Enrollments TO db_student;
+
+-- Grant EXECUTE privileges
 GRANT EXECUTE ON OBJECT::dbo.EnrollInCourse TO db_student;
 GO
 
@@ -647,10 +660,10 @@ WITH SCHEMABINDING
 AS
 RETURN SELECT 1 AS fn_accessResult
 WHERE 
-    -- Admins and Finance can see all rows
+    -- Admins and Finance can see all records
     CAST(SESSION_CONTEXT(N'UserRole') AS NVARCHAR(20)) IN ('Admin', 'Finance')
     OR
-    -- Students can only see rows matching their own StudentID
+    -- Students can only see their own records
     (CAST(SESSION_CONTEXT(N'UserRole') AS NVARCHAR(20)) = 'Student' 
      AND @StudentID = CAST(SESSION_CONTEXT(N'StudentID') AS INT));
 GO
@@ -663,14 +676,15 @@ RETURN SELECT 1 AS fn_accessResult
 WHERE 
     CAST(SESSION_CONTEXT(N'UserRole') AS NVARCHAR(20)) = 'Admin'
     OR
+    -- Faculty members can only see sections they teach
     (CAST(SESSION_CONTEXT(N'UserRole') AS NVARCHAR(20)) = 'Faculty' 
      AND @FacultyID = CAST(SESSION_CONTEXT(N'FacultyID') AS INT))
     OR
-    -- Students need to see all sections so they can enroll
+    -- Students can see all sections to facilitate course enrollment
     CAST(SESSION_CONTEXT(N'UserRole') AS NVARCHAR(20)) = 'Student';
 GO
 
--- C. Apply RLS Security Policies
+-- C. Apply Row-Level Security Policies
 IF EXISTS (SELECT * FROM sys.security_policies WHERE name = 'StudentEnrollmentsPolicy')
     DROP SECURITY POLICY Security.StudentEnrollmentsPolicy;
 GO
@@ -699,11 +713,11 @@ WITH (STATE = ON);
 GO
 
 
--- ==========================================
--- 4. SEED SAMPLE DATA
--- ==========================================
+-- =========================================================================
+-- SECTION 4: SEED SAMPLE DATA (INITIAL SEEDING)
+-- =========================================================================
 
--- Set Admin context so seeding bypasses RLS filters
+-- Set connection context temporarily to 'Admin' to bypass RLS filters
 EXEC sp_set_session_context N'UserRole', 'Admin';
 GO
 
@@ -729,7 +743,7 @@ BEGIN
 END
 GO
 
--- C. Seed Students (Student ID 1000)
+-- C. Seed Students (Student ID starts at 1000)
 IF NOT EXISTS (SELECT * FROM Students WHERE StudentID = 1000)
 BEGIN
     DECLARE @CS_DeptID INT = (SELECT DepartmentID FROM Departments WHERE DeptCode = 'CS');
@@ -787,7 +801,7 @@ BEGIN
 END
 GO
 
--- H. Seed FeePayments (Must be before Enrollments or after Students)
+-- H. Seed FeePayments
 IF NOT EXISTS (SELECT * FROM FeePayments)
 BEGIN
     DECLARE @FeeID INT = (SELECT TOP 1 FeeID FROM FeeStructure);
@@ -823,12 +837,105 @@ BEGIN
 END
 GO
 
--- K. Add Library user if not already existing
-IF NOT EXISTS (SELECT * FROM UserAccounts WHERE Username = 'librarian')
-BEGIN
-    INSERT INTO UserAccounts (Username, PasswordHash, Role, ReferenceID) VALUES
-    ('librarian', 'password', 'Library', 3);
-END
+
+-- =========================================================================
+-- SECTION 5: INLINE SQL QUERIES EXECUTED BY ASP.NET CORE C# CODE
+-- =========================================================================
+
+/* 
+  1. Connection context initialization (Executed on every DB connection open in SessionConnectionInterceptor.cs)
+     Used to set the context parameters for Row-Level Security evaluation.
+*/
+-- EXEC sp_set_session_context N'UserRole', @UserRole; 
+-- EXEC sp_set_session_context N'StudentID', @StudentID;
+-- EXEC sp_set_session_context N'FacultyID', @FacultyID;
+
+-- Example:
+EXEC sp_set_session_context N'UserRole', N'Student';
+EXEC sp_set_session_context N'StudentID', 1000;
+EXEC sp_set_session_context N'FacultyID', 0;
+GO
+
+/*
+  2. Student Statistics Queries (Executed in DashboardController.cs for student dashboard widgets)
+*/
+-- Fetch calculated CGPA for student 1000:
+SELECT dbo.fn_CalculateCGPA(1000) AS CGPA;
+
+-- Fetch calculated Outstanding Fee balance for student 1000:
+SELECT dbo.fn_GetOutstandingFee(1000) AS OutstandingFee;
+
+-- Fetch calculated Attendance Percentage for student 1000:
+SELECT dbo.fn_GetAttendancePercentage(1000) AS AttendancePercentage;
 GO
 
 
+-- =========================================================================
+-- SECTION 6: CORE DYNAMIC QUERIES TRANSLATED FROM APPLICATION CONTROLLERS (EF Core equivalents)
+-- =========================================================================
+
+-- A. Account Login (AccountController.cs)
+-- Validates login credentials and determines user role
+SELECT UserID, Username, Role, ReferenceID 
+FROM UserAccounts 
+WHERE Username = 'student@hitec.edu' AND PasswordHash = 'password';
+
+-- B. Fetch Student Dashboard Details (DashboardController.cs)
+-- 1. Student Profile
+SELECT s.*, p.ProgramName, d.DeptName 
+FROM Students s
+LEFT JOIN Programs p ON s.ProgramID = p.ProgramID
+LEFT JOIN Departments d ON s.DepartmentID = d.DepartmentID
+WHERE s.StudentID = 1000;
+
+-- 2. Enrollments Detail List
+SELECT e.EnrollmentID, c.CourseCode, c.CourseName AS CourseTitle, c.CreditHours, 
+       CONCAT(f.FirstName, ' ', f.LastName) AS FacultyName, s.Semester, g.MarksObtained AS Marks, g.LetterGrade
+FROM Enrollments e
+INNER JOIN Sections s ON e.SectionID = s.SectionID
+INNER JOIN Courses c ON s.CourseID = c.CourseID
+INNER JOIN Faculty f ON s.FacultyID = f.FacultyID
+LEFT JOIN Grades g ON g.EnrollmentID = e.EnrollmentID
+WHERE e.StudentID = 1000;
+
+-- 3. Fee Payment History
+SELECT PaymentID, AmountPaid, PaymentDate, PaymentMethod 
+FROM FeePayments 
+WHERE StudentID = 1000 
+ORDER BY PaymentDate DESC;
+
+-- 4. Library Borrow Issues
+SELECT li.IssueID, b.Title, b.Author, li.IssueDate, li.DueDate, li.ReturnDate, li.FineAmount
+FROM LibraryIssues li
+INNER JOIN LibraryItems b ON li.ItemID = b.ItemID
+WHERE li.StudentID = 1000;
+
+-- 5. Attendance Log
+SELECT ar.AttendanceID, c.CourseName AS CourseTitle, c.CourseCode, ar.ClassDate AS AttendanceDate, ar.Status
+FROM AttendanceRecords ar
+INNER JOIN Sections s ON ar.SectionID = s.SectionID
+INNER JOIN Courses c ON s.CourseID = c.CourseID
+WHERE ar.StudentID = 1000
+ORDER BY ar.ClassDate DESC;
+
+-- 6. Exam Results Record
+SELECT ResultID, Semester, SGPA, CGPA 
+FROM Results 
+WHERE StudentID = 1000 
+ORDER BY Semester DESC;
+
+-- C. Course Enrollment Listing (EnrollmentController.cs)
+-- Fetches available course sections for student enrollment
+SELECT s.SectionID, s.Semester, s.SectionName, s.AvailableSeats,
+       c.CourseCode, c.CourseName AS CourseTitle, c.CreditHours,
+       CONCAT(f.FirstName, ' ', f.LastName) AS FacultyName
+FROM Sections s
+INNER JOIN Courses c ON s.CourseID = c.CourseID
+INNER JOIN Faculty f ON s.FacultyID = f.FacultyID
+WHERE s.Semester = 'Spring 2025';
+
+-- Check if student is already enrolled in a section
+SELECT COUNT(*) 
+FROM Enrollments 
+WHERE StudentID = 1000 AND SectionID = 1; -- @SectionID parameter
+GO

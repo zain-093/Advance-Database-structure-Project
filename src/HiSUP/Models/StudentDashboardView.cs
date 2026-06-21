@@ -5,11 +5,11 @@ namespace HiSUP.Models
     public class StudentDashboardView
     {
         public int StudentID { get; set; }
-        public string RegistrationNo { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
-        public string Email { get; set; }
-        public string Phone { get; set; }
-        public int ProgramID { get; set; }
+        public string? Semester { get; set; }
+        public string? CourseName { get; set; }
+        public int TotalSemesterCourses { get; set; }
+        public decimal RunningTotalFeesPaid { get; set; }
     }
 }

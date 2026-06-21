@@ -144,6 +144,36 @@ namespace HiSUP.Controllers
                 })
                 .ToListAsync();
 
+            // Fetch Attendance Records
+            var attendanceRecords = await _context.AttendanceRecords
+                .Include(a => a.Section)
+                .ThenInclude(s => s.Course)
+                .Where(a => a.StudentID == currentStudentId)
+                .OrderByDescending(a => a.AttendanceDate)
+                .Select(a => new AttendanceDetailViewModel
+                {
+                    AttendanceID = a.AttendanceID,
+                    CourseName = a.Section.Course.CourseTitle ?? "N/A",
+                    CourseCode = a.Section.Course.CourseCode ?? "N/A",
+                    AttendanceDate = a.AttendanceDate ?? DateTime.MinValue,
+                    Status = a.Status
+                })
+                .ToListAsync();
+
+            // Fetch Semester Results
+            var semesterResults = await _context.Results
+                .Where(r => r.StudentID == currentStudentId)
+                .OrderByDescending(r => r.Semester)
+                .ToListAsync();
+
+            // Fetch Notifications
+            var notifications = await _context.Notifications.ToListAsync();
+
+            // Fetch Student Documents
+            var documents = await _context.StudentDocuments
+                .Where(d => d.StudentID == currentStudentId)
+                .ToListAsync();
+
             var viewModel = new StudentDashboardViewModel
             {
                 Student = student,
@@ -157,7 +187,11 @@ namespace HiSUP.Controllers
                 RoomNo = hostelAllotment?.RoomNo ?? "N/A",
                 Enrollments = enrollments,
                 FeePayments = payments,
-                LibraryIssues = libraryIssues
+                LibraryIssues = libraryIssues,
+                AttendanceRecords = attendanceRecords,
+                SemesterResults = semesterResults,
+                Notifications = notifications,
+                Documents = documents
             };
 
             return View(viewModel);

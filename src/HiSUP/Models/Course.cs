@@ -15,8 +15,14 @@ namespace HiSUP.Models
 
         [Required]
         [StringLength(100)]
+        [Column("CourseName")]
         public string CourseTitle { get; set; }
 
         public int? CreditHours { get; set; }
+
+        public int DepartmentID { get; set; }
+
+        [ForeignKey("DepartmentID")]
+        public virtual Department? Department { get; set; }
     }
 }

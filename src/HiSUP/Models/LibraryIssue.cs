@@ -19,10 +19,16 @@ namespace HiSUP.Models
         [DataType(DataType.Date)]
         public DateTime? ReturnDate { get; set; }
 
+        [DataType(DataType.Date)]
+        public DateTime DueDate { get; set; }
+
+        [Column(TypeName = "decimal(10,2)")]
+        public decimal? FineAmount { get; set; }
+
         [ForeignKey("StudentID")]
-        public virtual Student Student { get; set; }
+        public virtual Student? Student { get; set; }
 
         [ForeignKey("ItemID")]
-        public virtual LibraryItem LibraryItem { get; set; }
+        public virtual LibraryItem? LibraryItem { get; set; }
     }
 }

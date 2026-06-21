@@ -13,5 +13,7 @@ namespace HiSUP.Models
         public string HostelName { get; set; }
 
         public int? Capacity { get; set; }
+
+        public int? AvailableRooms { get; set; }
     }
 }

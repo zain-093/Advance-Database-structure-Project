@@ -17,5 +17,12 @@ namespace HiSUP.Models
 
         [StringLength(100)]
         public string Email { get; set; }
+
+        public int DepartmentID { get; set; }
+
+        [ForeignKey("DepartmentID")]
+        public virtual Department? Department { get; set; }
+
+        public DateTime? HireDate { get; set; }
     }
 }

@@ -539,7 +539,21 @@
                 <i class="fas fa-book-open"></i> <span>Enrollment</span>
             </a>
 
+            <div class="dash-nav-section">Academic</div>
+            <a href="#attendance-section" class="dash-nav-link">
+                <i class="fas fa-clipboard-check"></i> <span>Attendance</span>
+            </a>
+            <a href="#results-section" class="dash-nav-link">
+                <i class="fas fa-scroll"></i> <span>Results / Transcript</span>
+            </a>
+
             <div class="dash-nav-section">Other</div>
+            <a href="#notifications-section" class="dash-nav-link">
+                <i class="fas fa-bell"></i> <span>Notifications</span>
+            </a>
+            <a href="#documents-section" class="dash-nav-link">
+                <i class="fas fa-file-alt"></i> <span>Documents</span>
+            </a>
             <a asp-controller="Home" asp-action="Privacy" class="dash-nav-link">
                 <i class="fas fa-shield-halved"></i> <span>Privacy Policy</span>
             </a>
@@ -812,6 +826,198 @@
                     </table>
                 </div>
             </div>
+
+                <!-- Attendance Records -->
+                <div id="attendance-section" class="dash-section fade-up">
+                    <div class="dash-section-header">
+                        <div class="section-icon" style="background: linear-gradient(135deg, #F59E0B, #D97706);">
+                            <i class="fas fa-clipboard-check"></i>
+                        </div>
+                        <h3>Attendance Records</h3>
+                    </div>
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Course Code</th>
+                                <th>Course Name</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.AttendanceRecords.Any())
+                            {
+                                @foreach (var att in Model.AttendanceRecords)
+                                {
+                                    <tr>
+                                        <td>@att.AttendanceDate.ToString("MMM dd, yyyy")</td>
+                                        <td style="font-weight: 600;">@att.CourseCode</td>
+                                        <td>@att.CourseName</td>
+                                        <td>
+                                            @if (att.Status == "Present")
+                                            {
+                                                <span class="dash-badge success">Present</span>
+                                            }
+                                            else if (att.Status == "Late")
+                                            {
+                                                <span class="dash-badge" style="background: rgba(245, 158, 11, 0.08); color: #D97706;">Late</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="dash-badge" style="background: rgba(239, 68, 68, 0.08); color: #EF4444;">Absent</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4">
+                                        <div class="dash-empty">
+                                            <i class="fas fa-clipboard"></i>
+                                            <p>No attendance records available.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Semester Results / Transcript -->
+                <div id="results-section" class="dash-section fade-up">
+                    <div class="dash-section-header">
+                        <div class="section-icon" style="background: linear-gradient(135deg, #8B5CF6, #7C3AED);">
+                            <i class="fas fa-scroll"></i>
+                        </div>
+                        <h3>Semester Results / Transcript</h3>
+                    </div>
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Semester</th>
+                                <th>SGPA</th>
+                                <th>CGPA</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.SemesterResults.Any())
+                            {
+                                @foreach (var res in Model.SemesterResults)
+                                {
+                                    <tr>
+                                        <td style="font-weight: 600;">@res.Semester</td>
+                                        <td style="color: #059669; font-weight: 700;">@(res.GPA.HasValue ? res.GPA.Value.ToString("F2") : "N/A")</td>
+                                        <td style="color: var(--primary); font-weight: 700;">@(res.CGPA.HasValue ? res.CGPA.Value.ToString("F2") : "N/A")</td>
+                                        <td>
+                                            @if (res.GPA.HasValue && res.GPA.Value >= 2.0m)
+                                            {
+                                                <span class="dash-badge success">Passed</span>
+                                            }
+                                            else if (res.GPA.HasValue)
+                                            {
+                                                <span class="dash-badge" style="background: rgba(239, 68, 68, 0.08); color: #EF4444;">Probation</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="dash-badge" style="background: rgba(156, 163, 175, 0.08); color: #6B7280;">Pending</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4">
+                                        <div class="dash-empty">
+                                            <i class="fas fa-scroll"></i>
+                                            <p>No semester results available yet.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Notifications / Announcements -->
+                <div id="notifications-section" class="dash-section fade-up">
+                    <div class="dash-section-header">
+                        <div class="section-icon" style="background: linear-gradient(135deg, #06B6D4, #0891B2);">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <h3>University Announcements</h3>
+                    </div>
+                    @if (Model.Notifications.Any())
+                    {
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                        @foreach (var notif in Model.Notifications)
+                        {
+                            <div style="background: #F0F9FF; border-left: 4px solid #06B6D4; border-radius: 8px; padding: 16px 20px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fas fa-bullhorn" style="color: #06B6D4; font-size: 16px;"></i>
+                                    <span style="font-size: 14px; font-weight: 500; color: #1E3A5F;">@notif.Message</span>
+                                </div>
+                            </div>
+                        }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="dash-empty" style="padding: 40px 20px;">
+                            <i class="fas fa-bell-slash"></i>
+                            <p>No announcements at this time.</p>
+                        </div>
+                    }
+                </div>
+
+                <!-- Student Documents -->
+                <div id="documents-section" class="dash-section fade-up">
+                    <div class="dash-section-header">
+                        <div class="section-icon" style="background: linear-gradient(135deg, #EF4444, #DC2626);">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <h3>My Documents</h3>
+                    </div>
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Doc ID</th>
+                                <th>Document Name</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Documents.Any())
+                            {
+                                @foreach (var doc in Model.Documents)
+                                {
+                                    <tr>
+                                        <td style="font-weight: 600;">#DOC-@doc.DocumentID</td>
+                                        <td><i class="fas fa-file-pdf" style="color: #EF4444; margin-right: 6px;"></i> @doc.DocumentName</td>
+                                        <td>
+                                            <span class="dash-badge success">On File</span>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="3">
+                                        <div class="dash-empty">
+                                            <i class="fas fa-folder-open"></i>
+                                            <p>No documents uploaded yet.</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
 
         </main>
 

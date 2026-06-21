@@ -16,12 +16,17 @@ namespace HiSUP.Models
         [StringLength(20)]
         public string Semester { get; set; }
 
+        [Required]
+        [StringLength(10)]
+        public string SectionName { get; set; }
+
+        [Column("AvailableSeats")]
         public int? Capacity { get; set; }
 
         [ForeignKey("CourseID")]
-        public virtual Course Course { get; set; }
+        public virtual Course? Course { get; set; }
 
         [ForeignKey("FacultyID")]
-        public virtual Faculty Faculty { get; set; }
+        public virtual Faculty? Faculty { get; set; }
     }
 }

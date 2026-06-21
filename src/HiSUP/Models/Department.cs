@@ -11,10 +11,16 @@ namespace HiSUP.Models
 
         [Required]
         [StringLength(100)]
+        [Column("DeptName")]
         public string DepartmentName { get; set; }
 
         [Required]
         [StringLength(10)]
+        [Column("DeptCode")]
         public string DepartmentCode { get; set; }
+
+        public int? EstablishedYear { get; set; }
+
+        public DateTime? CreatedAt { get; set; }
     }
 }

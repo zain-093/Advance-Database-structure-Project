@@ -45,13 +45,26 @@ namespace HiSUP.Data
             modelBuilder.Entity<StudentDashboardView>()
                 .HasNoKey()
                 .ToView("vw_StudentDashboard");
+
+            // Configure tables with database triggers to prevent EF Core from using the SQL Server OUTPUT clause
+            modelBuilder.Entity<LibraryIssue>()
+                .ToTable(tb => tb.HasTrigger("trg_AfterLibraryReturn"));
+
+            modelBuilder.Entity<Student>()
+                .ToTable(tb => tb.HasTrigger("trg_AuditStudentUpdate"));
+
+            modelBuilder.Entity<FeePayment>()
+                .ToTable(tb => tb.HasTrigger("trg_AfterFeePayment"));
+
+            modelBuilder.Entity<Grade>()
+                .ToTable(tb => tb.HasTrigger("trg_AfterGradeInsert"));
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Server=.;Database=HITECUNI_DB;Trusted_Connection=True;TrustServerCertificate=True;");
+                optionsBuilder.UseSqlServer("Server=.;Database=HiSUP_DB;Trusted_Connection=True;TrustServerCertificate=True;");
             }
         }
     }

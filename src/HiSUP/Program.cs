@@ -58,7 +58,7 @@ public class HiSUPContextFactory : Microsoft.EntityFrameworkCore.Design.IDesignT
     public HiSUP.Data.HiSUPContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<HiSUP.Data.HiSUPContext>();
-        optionsBuilder.UseSqlServer("Server=.;Database=HITECUNI_DB;Trusted_Connection=True;TrustServerCertificate=True;");
+        optionsBuilder.UseSqlServer("Server=.;Database=HiSUP_DB;Trusted_Connection=True;TrustServerCertificate=True;");
         return new HiSUP.Data.HiSUPContext(optionsBuilder.Options);
     }
 }

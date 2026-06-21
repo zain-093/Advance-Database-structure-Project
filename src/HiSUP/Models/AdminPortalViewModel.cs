@@ -27,5 +27,16 @@ namespace HiSUP.Models
         public List<AuditLog> AuditLogs { get; set; } = new();
         public List<Notification> Notifications { get; set; } = new();
         public List<StudentDocument> StudentDocuments { get; set; } = new();
+
+        // ===== Admin KPI Summary =====
+        public decimal TotalFeeCollected { get; set; }
+        public int HostelOccupancy { get; set; }
+        public int TotalLibraryBooks { get; set; }
+
+        // ===== Faculty-specific =====
+        public string FacultyName { get; set; }
+        public int FacultyAssignedCourses { get; set; }
+        public int FacultySections { get; set; }
+        public int FacultyStudentCount { get; set; }
     }
 }
